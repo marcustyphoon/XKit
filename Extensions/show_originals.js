@@ -32,7 +32,7 @@ XKit.extensions.show_originals = new Object({
 			value: false
 		},
 		"hide_completely": {
-			text: "Hide posts completely (warning: breaks j/k scrolling)",
+			text: "Hide posts completely",
 			default: false,
 			value: false,
 			experimental: true
@@ -54,6 +54,10 @@ XKit.extensions.show_originals = new Object({
 				.noreblogs-note ~ * {
 					display: none;
 				}
+				.noreblogs-hidden {
+					height: 0;
+					margin: 0;
+					overflow: hidden;
 			`, 'noreblogs');
 
 			XKit.post_listener.add('noreblogs', this.react_do);
@@ -78,7 +82,13 @@ XKit.extensions.show_originals = new Object({
 			if (show_original_reblogs.value && rebloggedRootName == blogName) { return; }
 			
 			// Hide everything else
-			$this.prepend('<div class="noreblogs-note">' + blogName + ' <a href="' + postUrl + '" target="_blank">reblogged</a> ' + rebloggedRootName + '</div>');
+			if (hide_completely.value) {
+				$this.addClass('noreblogs-hidden');
+			} else if (generic_message.value) {
+				$this.prepend('<div class="noreblogs-note">Hidden by Show Originals</div>');
+			} else {
+				$this.prepend('<div class="noreblogs-note">' + blogName + ' <a href="' + postUrl + '" target="_blank">reblogged</a> ' + rebloggedRootName + '</div>');
+			}
 
 		});
 	},
