@@ -18,9 +18,24 @@ XKit.extensions.show_originals = new Object({
 			type: "separator"
 		},
 		"show_original_reblogs": {
-			text: "Show when someone reblogs their own original content",
+			text: "Show reblogs if the original post was by the same blog",
 			default: true,
 			value: true
+		},
+		"sep-1": {
+			text: "Appearance",
+			type: "separator"
+		},
+		"generic_message": {
+			text: "Show a generic message in place of hidden posts",
+			default: false,
+			value: false
+		},
+		"hide_completely": {
+			text: "Hide posts completely (warning: breaks j/k scrolling)",
+			default: false,
+			value: false,
+			experimental: true
 		},
 	},
 
@@ -50,7 +65,7 @@ XKit.extensions.show_originals = new Object({
 	react_do: function() {
 		$('[data-id]:not(.noreblogs-done)').each(async function() {
 			const $this = $(this).addClass('noreblogs-done');
-			const {show_original_reblogs} = XKit.extensions.show_originals.preferences;
+			const {show_original_reblogs, generic_message, hide_completely} = XKit.extensions.show_originals.preferences;
 			const {rebloggedFromUrl, rebloggedRootName, blogName, postUrl} = await XKit.interface.react.post_props($this.attr('data-id'));
 			
 			// Prevent hiding posts in peepr
