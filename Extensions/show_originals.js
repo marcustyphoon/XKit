@@ -48,7 +48,6 @@ XKit.extensions.show_originals = new Object({
 					height: 1em;
 					color: var(--white-on-dark);
 					opacity: 0.4;
-					//padding: var(--post-header-vertical-padding) var(--post-padding);
 					padding: 0 var(--post-padding);
 				}
 				.noreblogs-note ~ * {
@@ -72,7 +71,7 @@ XKit.extensions.show_originals = new Object({
 			const {show_original_reblogs, generic_message, hide_completely} = XKit.extensions.show_originals.preferences;
 			const {rebloggedFromUrl, rebloggedRootName, blogName, postUrl} = await XKit.interface.react.post_props($this.attr('data-id'));
 			
-			// Prevent hiding posts in peepr
+			// Don't hide anything in the sidebar
 			if ($this.closest("#glass-container").length > 0) { return; }
 			
 			// Don't hide original posts
@@ -96,6 +95,7 @@ XKit.extensions.show_originals = new Object({
 	destroy: function() {
 		this.running = false;
 		$('.noreblogs-done').removeClass('noreblogs-done');
+		$('.noreblogs-hidden').removeClass('noreblogs-hidden');
 		$('.noreblogs-note').remove();
 		XKit.post_listener.remove('noreblogs');
 		XKit.tools.remove_css("noreblogs");
