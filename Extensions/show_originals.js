@@ -22,12 +22,12 @@ XKit.extensions.show_originals = new Object({
 			default: true,
 			value: true
 		},
-		"in_sidebar": {
+		/* "in_sidebar": {
 			text: "Hide reblogs in the sidebar",
 			default: false,
 			value: false,
 			experimental: true
-		},
+		}, */
 		"sep-1": {
 			text: "Appearance",
 			type: "separator"
