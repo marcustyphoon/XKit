@@ -101,7 +101,7 @@ XKit.extensions.show_originals = new Object({
 	destroy: function() {
 		this.running = false;
 		$('.noreblogs-done').removeClass('noreblogs-done');
-		$('.noreblogs-hidden').removeClass('noreblogs-hidden');
+		$('.noreblogs-completely-hidden').removeClass('noreblogs-completely-hiddenn');
 		$('.noreblogs-note').remove();
 		XKit.post_listener.remove('noreblogs');
 		XKit.tools.remove_css("noreblogs");
