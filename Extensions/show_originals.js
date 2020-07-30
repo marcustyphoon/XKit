@@ -50,30 +50,30 @@ XKit.extensions.show_originals = new Object({
 
 		if (XKit.page.react) {
 			XKit.tools.add_css(`
-				.noreblogs-note {
+				.showoriginals-note {
 					height: 1em;
 					color: var(--white-on-dark);
 					opacity: 0.4;
 					padding: 0 var(--post-padding);
 				}
-				.noreblogs-note ~ * {
+				.showoriginals-note ~ * {
 					display: none;
 				}
-				.noreblogs-completely-hidden {
+				.showoriginals-completely-hidden {
 					height: 0;
 					margin: 0;
 					overflow: hidden;
-			`, 'noreblogs');
+			`, 'showoriginals');
 
-			XKit.post_listener.add('noreblogs', this.react_do);
+			XKit.post_listener.add('showoriginals', this.react_do);
 			this.react_do();
 			return;
 		}
 	},
 
 	react_do: function() {
-		$('[data-id]:not(.noreblogs-done)').each(async function() {
-			const $this = $(this).addClass('noreblogs-done');
+		$('[data-id]:not(.showoriginals-done)').each(async function() {
+			const $this = $(this).addClass('showoriginals-done');
 			const {show_original_reblogs,in_sidebar,generic_message, hide_completely} = XKit.extensions.show_originals.preferences;
 			const {rebloggedFromUrl, rebloggedRootName, blogName, postUrl} = await XKit.interface.react.post_props($this.attr('data-id'));
 
@@ -88,11 +88,11 @@ XKit.extensions.show_originals = new Object({
 
 			// Hide everything else
 			if (hide_completely.value) {
-				$this.addClass('noreblogs-completely-hidden');
+				$this.addClass('showoriginals-completely-hidden');
 			} else if (generic_message.value) {
-				$this.prepend('<div class="noreblogs-note">Hidden by Show Originals</div>');
+				$this.prepend('<div class="showoriginals-note">Hidden by Show Originals</div>');
 			} else {
-				$this.prepend('<div class="noreblogs-note">' + blogName + ' <a href="' + postUrl + '" target="_blank">reblogged</a> ' + rebloggedRootName + '</div>');
+				$this.prepend('<div class="showoriginals-note">' + blogName + ' <a href="' + postUrl + '" target="_blank">reblogged</a> ' + rebloggedRootName + '</div>');
 			}
 
 		});
@@ -100,11 +100,11 @@ XKit.extensions.show_originals = new Object({
 
 	destroy: function() {
 		this.running = false;
-		$('.noreblogs-done').removeClass('noreblogs-done');
-		$('.noreblogs-completely-hidden').removeClass('noreblogs-completely-hiddenn');
-		$('.noreblogs-note').remove();
-		XKit.post_listener.remove('noreblogs');
-		XKit.tools.remove_css("noreblogs");
+		$('.showoriginals-done').removeClass('showoriginals-done');
+		$('.showoriginals-completely-hidden').removeClass('showoriginals-completely-hiddenn');
+		$('.showoriginals-note').remove();
+		XKit.post_listener.remove('showoriginals');
+		XKit.tools.remove_css("showoriginals");
 	}
 
 });
