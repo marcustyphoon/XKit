@@ -88,6 +88,14 @@ XKit.extensions.shorten_posts = new Object({
 		this.running = true;
 		XKit.extensions.shorten_posts.cpanel_check_height();
 
+		if (XKit.page.react) {
+			XKit.tools.init_css("shorten_posts");
+			$(document).on("click", ".xkit-shorten-posts-embiggen", XKit.extensions.shorten_posts.embiggen);
+			XKit.post_listener.add('shorten_posts', this.react_do);
+			this.react_do();
+			return;
+		}
+
 		if ($(".posts .post").length > 0) {
 			XKit.tools.init_css("shorten_posts");
 			$(document).on("click", ".xkit-shorten-posts-embiggen", XKit.extensions.shorten_posts.embiggen);
@@ -163,6 +171,63 @@ XKit.extensions.shorten_posts = new Object({
 		}
 
 	},
+
+	react_do: function() {
+		$('[data-id]:not(.xkit-shorten-posts-done)').each(async function() {
+			const $this = $(this).addClass('xkit-shorten-posts-done');
+			const {text_too, photos_too, audio_too, asks_too, videos_too, chat_too, links_too, quotes_too} = XKit.extensions.shorten_posts.preferences;
+			const {originalType} = await XKit.interface.react.post_props($this.attr('data-id'));
+
+			var m_height = $(this).height();
+
+			if ($(this).hasClass("xblacklist_blacklisted_post")) { return; }
+
+			var dont_return = false;
+			if (text_too.value
+				&& originalType == 'regular') {
+				dont_return = true;
+			}
+			if (photos_too.value
+				&& originalType == 'photoset') {
+				dont_return = true;
+			}
+			if (audio_too.value
+				&& originalType == 'audio') {
+				dont_return = true;
+			}
+			if (links_too.value
+				&& originalType == 'link') {
+				dont_return = true;
+			}
+			if (chat_too.value
+				&& originalType == 'conversation') {
+				dont_return = true;
+			}
+			if (quotes_too.value
+				&& originalType == 'quote') {
+				dont_return = true;
+			}
+			if (asks_too.value
+				&& originalType == 'note') {
+				dont_return = true;
+			}
+			if (videos_too.value
+				&& originalType == 'video') {
+				dont_return = true;
+			}
+
+			if (!dont_return) {
+				return;
+			}
+
+			if (m_height >= XKit.extensions.shorten_posts.preferences.height.value) {
+				XKit.extensions.shorten_posts.short($(this), m_height);
+			}
+
+
+		});
+	},
+
 
 	embiggen: function(e) {
 
