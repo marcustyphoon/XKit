@@ -492,7 +492,7 @@ XKit.extensions.xkit_patches = new Object({
 				init: async function() {
 					if (XKit.page.react) {
 
-						XKit.css_map.getCssMap().then(() => {
+						await XKit.css_map.getCssMap().then(() => {
 							const $sidebar = $(XKit.css_map.keyToCss("sidebar")).find("aside");
 
 							const html = `<div id="xkit_sidebar"></div>`;
@@ -607,15 +607,12 @@ XKit.extensions.xkit_patches = new Object({
 				 * Shortcut command for constructing and applying controls sections
 				 * @param {Object} section - see construct's documentation
 				 */
-				add: function(section) {
+				add: async function(section) {
 					if (!$("#xkit_sidebar").length) {
-						this.init();
+						await this.init();
 					}
 
-					console.log('adding to sidebar: ' + this.construct(section));
 					$("#xkit_sidebar").append(this.construct(section));
-
-					$("#xkit_sidebar").append("hi");
 				},
 
 				remove: id => $(`#${id}, #${id} + .small_links`).remove()
