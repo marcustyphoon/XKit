@@ -489,7 +489,44 @@ XKit.extensions.xkit_patches = new Object({
 			"xkit_patches");
 
 			XKit.interface.sidebar = {
-				init: function() {
+				init: async function() {
+					if (XKit.page.react) {
+
+						XKit.css_map.getCssMap().then(() => {
+							const $sidebar = $(XKit.css_map.keyToCss("sidebar")).find("aside");
+
+							const html = `<div id="xkit_sidebar"></div>`;
+							/* const priority = [
+								$(".small_links"),
+								$("#dashboard_controls_open_blog"),
+								$(".controls_section.inbox"),
+								$(".sidebar_link.explore_link"),
+								$(".controls_section.recommended_tumblelogs"),
+								$("#tumblr_radar")
+							];
+
+							for (let section of priority) {
+								if (section.length) {
+									section.first().after(html);
+									break;
+								}
+							} */
+
+							if (!$("#xkit_sidebar").length) {
+								$sidebar.prepend(html);
+							}
+
+							XKit.tools.add_css(`
+								.controls_section.recommended_tumblelogs:not(:first-child) {
+									margin-top: 18px !important;
+								}`,
+							"sidebar_margins_fix");
+
+						}).catch(e => console.error("Can't run sidebar.init:" + e.message));
+
+						return;
+					}
+
 					const html = `<div id="xkit_sidebar"></div>`;
 					const priority = [
 						$(".small_links"),
@@ -575,7 +612,10 @@ XKit.extensions.xkit_patches = new Object({
 						this.init();
 					}
 
+					console.log('adding to sidebar: ' + this.construct(section));
 					$("#xkit_sidebar").append(this.construct(section));
+
+					$("#xkit_sidebar").append("hi");
 				},
 
 				remove: id => $(`#${id}, #${id} + .small_links`).remove()
