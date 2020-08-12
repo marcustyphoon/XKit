@@ -499,15 +499,11 @@ XKit.extensions.xkit_patches = new Object({
 					margin-bottom: 38px;
 				}
 
-				.xkit--react .controls_section .control-anchor {
-					line-height: 30px;
-				}
-
 				.xkit--react .controls_section .controls_section_item {
 					border-top: 1px solid var(--transparent-white-7);
 					position: relative;
-					padding: 0;
 					color: var(--transparent-white-65);
+					line-height: 30px;
 				}
 
 				.xkit--react .controls_section .controls_section_item:hover {
@@ -525,8 +521,7 @@ XKit.extensions.xkit_patches = new Object({
 				}
 
 				.xkit--react .controls_section .hide_overflow {
-					width: 100%;
-
+					width: 88%;
 					padding-left: 10px;
 					font-weight: 700;
 					line-height: 30px;
@@ -541,23 +536,8 @@ XKit.extensions.xkit_patches = new Object({
 					display: flex;
 				}
 
-				.xkit--react .controls_section .sub_control {
-					position: absolute;
-					right: 0;
-					margin-right: 10px;
-					padding: 1px;
-					font-size: 12px;
-					background: none;
-					cursor: pointer;
-					font-family: tumblr-icons,Blank;
-				}
-
-				.xkit--react .icon_arrow_carrot_right:before {
-					content: "\EA09";
-				}
-
 				.xkit--react .small_links {
-					border-top: 1px solid hsla(0,0%,100%,.07);
+					border-top: 1px solid var(--transparent-white-7);
 					overflow: hidden;
 				}
 
@@ -565,7 +545,6 @@ XKit.extensions.xkit_patches = new Object({
 					padding: 11px 13px 0;
 					color: var(--transparent-white-65);
 					font-size: 11px;
-					text-decoration: none;
 				}
 
 				.xkit--react .small_links a:first-child {
@@ -576,7 +555,6 @@ XKit.extensions.xkit_patches = new Object({
 					float: right;
 				}
 			`;
-
 			XKit.tools.add_css(sidebar_css, "xkit_patches_sidebar");
 
 			XKit.interface.sidebar = {
