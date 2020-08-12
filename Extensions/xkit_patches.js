@@ -500,9 +500,7 @@ XKit.extensions.xkit_patches = new Object({
 				}
 
 				.xkit--react .controls_section .control-anchor {
-					display: block;
-					font-weight: 700;
-					line-height: 36px;
+					line-height: 30px;
 				}
 
 				.xkit--react .controls_section .controls_section_item {
@@ -540,6 +538,7 @@ XKit.extensions.xkit_patches = new Object({
 					right: 10px;
 					font-size: 13px;
 					font-weight: 400;
+					display: flex;
 				}
 
 				.xkit--react .controls_section .sub_control {
@@ -731,9 +730,8 @@ XKit.extensions.xkit_patches = new Object({
 								<a id="${item.id}" class="control-item control-anchor" style="cursor:pointer">
 									<div class="hide_overflow">
 										${item.text}
-										${(item.carrot ? '<i class="sub_control link_arrow icon_right icon_arrow_carrot_right"></i>' : "")}
 									</div>
-									<span class="count">${item.count || ""}</span>
+									<span class="count">${(item.count ? item.count : "")}${(item.carrot ? '<svg height="30px" fill="var(--transparent-white-65)" viewBox="0 -16 13 52.1"><path d="M0,2.9l7.2,7.2l-7.1,7.1L3,20.1l7.1-7.1l2.9-2.9L2.9,0L0,2.9"></path></svg>' : "")}</span>
 								</a>
 							</li>`;
 					}
