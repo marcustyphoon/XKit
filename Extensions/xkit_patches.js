@@ -1178,6 +1178,9 @@ XKit.extensions.xkit_patches = new Object({
 							const $sidebar = $(XKit.css_map.keyToCss("sidebar")).find("aside");
 
 							const html = `<div id="xkit_sidebar"></div>`;
+
+							//currently unimplemented: put the xkit sidebar after (some of the) other sidebar elements
+
 							/* const priority = [
 								$(".small_links"),
 								$("#dashboard_controls_open_blog"),
