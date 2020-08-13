@@ -1103,7 +1103,7 @@ XKit.extensions.xkit_patches = new Object({
 			};
 
 			const react_sidebar_css = `
-				.xkit--react .controls_section ol, .xkit--react .controls_section li {
+				.xkit--react .controls_section li {
 					list-style-type: none;
 				}
 
@@ -1117,6 +1117,7 @@ XKit.extensions.xkit_patches = new Object({
 					position: relative;
 					color: var(--transparent-white-65);
 					line-height: 30px;
+					font-weight: 700;
 				}
 
 				.xkit--react .controls_section .controls_section_item:hover {
@@ -1127,17 +1128,12 @@ XKit.extensions.xkit_patches = new Object({
 					white-space: nowrap;
 					overflow: hidden;
 					text-overflow: ellipsis;
+					width: 88%;
+					padding-left: 10px;
 				}
 
 				.xkit--react .controls_section a {
 					text-decoration: none;
-				}
-
-				.xkit--react .controls_section .hide_overflow {
-					width: 88%;
-					padding-left: 10px;
-					font-weight: 700;
-					line-height: 30px;
 				}
 
 				.xkit--react .controls_section a .count {
@@ -1160,13 +1156,8 @@ XKit.extensions.xkit_patches = new Object({
 					font-size: 11px;
 				}
 
-				.xkit--react .small_links a:first-child {
-					float: left;
-				}
-
-				.xkit--react .small_links a:nth-child(2) {
-					float: right;
-				}
+				.xkit--react .small_links a:first-child { float: left; }
+				.xkit--react .small_links a:nth-child(2) { float: right; }
 			`;
 			XKit.tools.add_css(react_sidebar_css, "xkit_patches_react_sidebar");
 
@@ -1175,39 +1166,20 @@ XKit.extensions.xkit_patches = new Object({
 					if (XKit.page.react) {
 
 						await XKit.css_map.getCssMap().then(() => {
-							const $sidebar = $(XKit.css_map.keyToCss("sidebar")).find("aside");
+							if ($("#xkit_sidebar").length) { return; }
 
 							const html = `<div id="xkit_sidebar"></div>`;
 
-							//currently unimplemented: put the xkit sidebar after (some of the) other sidebar elements
-
-							/* const priority = [
-								$(".small_links"),
-								$("#dashboard_controls_open_blog"),
-								$(".controls_section.inbox"),
-								$(".sidebar_link.explore_link"),
-								$(".controls_section.recommended_tumblelogs"),
-								$("#tumblr_radar")
-							];
-
-							for (let section of priority) {
-								if (section.length) {
-									section.first().after(html);
-									break;
-								}
-							} */
-
-							if (!$("#xkit_sidebar").length) {
-								$sidebar.prepend(html);
+							//inject after the sidebarItem containing the navigation on tumblr.com/blog/myblogname pages
+							const $navigationSidebarItem = $(XKit.css_map.keyToCss("sideBar")).first().parent();
+							if ($navigationSidebarItem.length) {
+								$navigationSidebarItem.after(html);
+								return;
 							}
 
-							/*
-							XKit.tools.add_css(`
-								.controls_section.recommended_tumblelogs:not(:first-child) {
-									margin-top: 18px !important;
-								}`,
-							"sidebar_margins_fix");
-							*/
+							//inject at the top of the sidebar container
+							const $sidebarContainer = $(XKit.css_map.keyToCss("sidebar")).find("> aside");
+							$sidebarContainer.prepend(html);
 
 						}).catch(e => console.error("Can't run sidebar.init:" + e.message));
 
