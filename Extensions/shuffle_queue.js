@@ -46,18 +46,45 @@ XKit.extensions.shuffle_queue = new Object({
 					.map(selectors => selectors.join(joincharacter)).join(',');
 			};
 
-			const modifiedSelector = function(keyA, modification) {
+			/* const modifiedSelector = function(keyA, modification) {
 				const blobs = [keyToClasses(keyA).map(cls => `.${cls}`), [modification]];
 				return XKit.tools.cartesian_product(blobs)
 					.map(selectors => selectors.join("")).join();
+			}; */
+
+			const modifiedSelector = (key, modification) => keyToClasses(key).map(cls => `.${cls}${modification}`).join();
+
+
+			/**
+			 * this is horrible
+			 *
+			 * @param  {...any} CSS map selectors as strings, and/or text to be
+			 *     placed between them as single-element arrays of strings.
+			 * @returns {string} A single CSS selector
+			 */
+			/*
+			const parseSelectors = function(...parts) {
+				const convertPart = part => Array.isArray(part) ? part : keyToClasses(part).map(cls => `.${cls}`);
+				const parsedInput = parts.map(part => convertPart(part));
+				return XKit.tools.cartesian_product(parsedInput)
+					.map(selectors => selectors.join("")).join(',');
 			};
 
+			${parseSelectors("stickyContainer", [" + "], "header", ["[aria-label*='reblog']"])} {
+					background-color: red;
+				}
+			*/
+
 			this.shrinkPostsCss = `
-				${modifiedSelector("stickyContainer", " + header")} {
+				.sortableContainer header {
 					padding-top: 10px;
+					padding-left: calc(var(--post-padding) - 10px);
 					margin-bottom: 10px;
 				}
-				${pairSelector("stickyContainer", "avatar", " + header ")} {
+				/* ${pairSelector("timeline", "avatar", " header ")} {
+					display: none;
+				} */
+				.sortableContainer a[title=${XKit.interface.where().user_url}] {
 					display: none;
 				}
 				${cssSelect("reblog")} {
