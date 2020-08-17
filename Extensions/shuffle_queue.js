@@ -11,6 +11,7 @@ XKit.extensions.shuffle_queue = new Object({
 	running: false,
 
 	queueoptions_selector: ".dashboard_options_form",
+	shrinkPostsCss: "",
 
 	run: async function() {
 
@@ -33,6 +34,55 @@ XKit.extensions.shuffle_queue = new Object({
 			});
 			await XKit.css_map.getCssMap();
 			this.queueoptions_selector = XKit.css_map.keyToCss('queueSettings');
+
+
+			const {keyToClasses, keyToCss} = XKit.css_map;
+
+			const cssSelect = selector => keyToCss(selector);
+
+			const pairSelector = function(keyA, keyB, joincharacter) {
+				const keys = [keyA, keyB];
+				return XKit.tools.cartesian_product(keys.map(key => keyToClasses(key).map(cls => `.${cls}`)))
+					.map(selectors => selectors.join(joincharacter)).join(',');
+			};
+
+			const modifiedSelector = function(keyA, modification) {
+				const blobs = [keyToClasses(keyA).map(cls => `.${cls}`), [modification]];
+				return XKit.tools.cartesian_product(blobs)
+					.map(selectors => selectors.join("")).join();
+			};
+
+			this.shrinkPostsCss = `
+				${modifiedSelector("post", " header[role=banner]")} {
+					/* nothing at the moment */
+				}
+				${cssSelect("reblog")} {
+					pointer-events: none !important;
+					max-height: 120px !important;
+					overflow: hidden !important;
+					border: 1px dashed rgb(200,200,200);
+				}
+				${pairSelector("reblog", "reblog", "+")} {
+					max-height: 30px !important;
+					margin-top: 0;
+					padding-top: 5px;
+					/* border-top: none; */
+					/* border-top: 3px dashed rgb(200,200,200); */
+					/* border-bottom: 3px dashed rgb(200,200,200); */
+				}
+				${modifiedSelector("reblog", ":nth-last-of-type(2)")} {
+					max-height: 120px !important;
+					padding-top: 10px;
+				}
+				${modifiedSelector("reblog", ":nth-last-of-type(1)")} {
+					max-height: 120px !important;
+					padding-top: 10px;
+				}
+				${cssSelect("contentSource")} {
+					display: none;
+				}`;
+			console.log(this.shrinkPostsCss);
+
 		} else {
 			XKit.interface.sidebar.add({
 				id: "queue_plus_sidebar",
@@ -44,6 +94,9 @@ XKit.extensions.shuffle_queue = new Object({
 					{ id: "xqueueoptions_button", text: "Queue Options", count: "on" }
 				]
 			});
+			this.shrinkPostsCss = ".post_header { display: none; }" +
+			".post .post_content_inner, .post .post_media { height: 70px !important; overflow: hidden !important; }" +
+			".post .post_content { pointer-events: none !important; height: 70px !important; overflow: hidden !important; border: 1px dashed rgb(200,200,200); }";
 		}
 
 		$("#xshufflequeue_button").click(() => this.shuffle());
@@ -64,13 +117,7 @@ XKit.extensions.shuffle_queue = new Object({
 				if ($button.hasClass("xkit-queue-option-button-on")) {
 					$button.find(".count").html("on");
 					XKit.storage.set("shuffle_queue", "shrink_posts", "true");
-					XKit.tools.add_css(
-						".post_header { display: none; }" +
-						".post .post_content_inner, .post .post_media { height: 70px !important; overflow: hidden !important; }" +
-						".post .post_content { pointer-events: none !important; height: 70px !important; overflow: hidden !important; border: 1px dashed rgb(200,200,200); }",
-
-						"shuffle_queue_mini_posts"
-					);
+					XKit.tools.add_css(XKit.extensions.shuffle_queue.shrinkPostsCss, "shuffle_queue_mini_posts");
 				} else {
 					$button.find(".count").html("off");
 					XKit.storage.set("shuffle_queue", "shrink_posts", "false");
