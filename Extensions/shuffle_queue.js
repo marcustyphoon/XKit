@@ -53,33 +53,46 @@ XKit.extensions.shuffle_queue = new Object({
 			};
 
 			this.shrinkPostsCss = `
-				${modifiedSelector("post", " header[role=banner]")} {
-					/* nothing at the moment */
+				${modifiedSelector("stickyContainer", " + header")} {
+					padding-top: 10px;
+					margin-bottom: 10px;
+				}
+				${pairSelector("stickyContainer", "avatar", " + header ")} {
+					display: none;
 				}
 				${cssSelect("reblog")} {
-					pointer-events: none !important;
-					max-height: 120px !important;
-					overflow: hidden !important;
-					border: 1px dashed rgb(200,200,200);
+					box-shadow: 0 -0px 8px var(--gray-65);
+					max-height: 170px !important;
+					/* border: 1px dashed rgb(200,200,200); */
+					padding-top: 10px;
+					overflow-y: scroll;
+					margin-top: 0;
 				}
 				${pairSelector("reblog", "reblog", "+")} {
-					max-height: 30px !important;
+					max-height: 23px !important;
 					margin-top: 0;
-					padding-top: 5px;
-					/* border-top: none; */
-					/* border-top: 3px dashed rgb(200,200,200); */
-					/* border-bottom: 3px dashed rgb(200,200,200); */
+					padding-top: 3px;
+					overflow: hidden;
+					pointer-events: none;
 				}
 				${modifiedSelector("reblog", ":nth-last-of-type(2)")} {
-					max-height: 120px !important;
+					max-height: 170px !important;
 					padding-top: 10px;
+					overflow-y: scroll;
+					pointer-events: auto;
 				}
 				${modifiedSelector("reblog", ":nth-last-of-type(1)")} {
-					max-height: 120px !important;
+					max-height: 170px !important;
 					padding-top: 10px;
+					overflow-y: scroll;
+					pointer-events: auto;
 				}
 				${cssSelect("contentSource")} {
 					display: none;
+				}
+				footer[role=contentinfo] {
+					margin-top: 5px;
+    				padding-bottom: 5px;
 				}`;
 			console.log(this.shrinkPostsCss);
 
