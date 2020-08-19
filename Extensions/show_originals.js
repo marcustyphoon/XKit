@@ -18,7 +18,26 @@ XKit.extensions.show_originals = new Object({
 	my_blogs: [],
 	blogs_to_exclude: [],
 
+	experimental_count: 0,
+	reblogAttributionSelector: "",
+	reblogAttributionSelectorTwo: "",
+	rebloggedFromNameSelector: "",
+	avatarWrapperSelector: "",
+
 	preferences: {
+		"experimental_mode": {
+			text: "Experimental Modes",
+			type: "combo",
+			values: [
+				"Normal", "normal",
+				"Reduced post_props calls", "reduced",
+				"No post_props calls", "none",
+				"No post_props ultralite", "ultranone"
+			],
+			default: "normal",
+			value: "normal",
+			experimental: true
+		},
 		"sep-0": {
 			text: "Exclusions",
 			type: "separator"
@@ -198,8 +217,29 @@ XKit.extensions.show_originals = new Object({
 
 			XKit.interface.hide(".showoriginals-hidden-completely, .showoriginals-hidden-completely + :not([data-id])", "showoriginals");
 
-			XKit.post_listener.add('showoriginals', this.react_do);
-			this.react_do();
+			await XKit.css_map.getCssMap();
+			this.reblogAttributionSelector = XKit.css_map.keyToCss("reblogAttribution");
+
+			const modifiedSelector = (key, modification) => XKit.css_map.keyToClasses(key).map(cls => `.${cls}${modification}`).join();
+			this.reblogAttributionSelectorTwo = modifiedSelector("reblogAttribution", ":not(.showoriginals-done)");
+
+			this.rebloggedFromNameSelector = XKit.css_map.keyToCss("rebloggedFromName");
+			this.avatarWrapperSelector = XKit.css_map.keyToCss("avatarWrapper");
+
+			if (this.preferences.experimental_mode.value == "reduced") {
+				XKit.post_listener.add('showoriginals', this.react_do_reduced);
+				this.react_do_reduced();
+			} else if (this.preferences.experimental_mode.value == "none") {
+				XKit.post_listener.add('showoriginals', this.react_do_none);
+				this.react_do_none();
+			} else if (this.preferences.experimental_mode.value == "ultranone") {
+				XKit.post_listener.add('showoriginals', this.react_do_ultranone);
+				this.react_do_ultranone();
+			} else {
+				XKit.post_listener.add('showoriginals', this.react_do);
+				this.react_do();
+			}
+
 			return;
 		}
 	},
@@ -263,6 +303,13 @@ XKit.extensions.show_originals = new Object({
 
 			// We haven't returned, so hide the post now:
 
+			XKit.extensions.show_originals.experimental_count++;
+			console.log(XKit.extensions.show_originals.experimental_count);
+			if (XKit.extensions.show_originals.experimental_count > 100) {
+				$("._2hdQN").css("background", "darkslateblue");
+				XKit.post_listener.remove('showoriginals', this.react_do);
+			}
+
 			if (hide_posts_completely.value && !inSidebar) {
 				$this.addClass('showoriginals-hidden-completely');
 
@@ -286,6 +333,201 @@ XKit.extensions.show_originals = new Object({
 
 		});
 	},
+
+	react_do_reduced: function() {
+
+		if (XKit.extensions.show_originals.preferences.use_sidebar_toggle.value && XKit.extensions.show_originals.status == "false") {
+			$('.showoriginals-done').removeClass('showoriginals-done');
+			$('.showoriginals-hidden').removeClass('showoriginals-hidden');
+			$('.showoriginals-hidden-completely').removeClass('showoriginals-hidden-completely');
+			$('.showoriginals-hidden-note').remove();
+			return;
+		}
+
+		//runs on each post
+		$('[data-id]:not(.showoriginals-done)').each(async function() {
+			const $this = $(this).addClass('showoriginals-done');
+
+			if (!$this.find(XKit.extensions.show_originals.reblogAttributionSelector).length) {
+				return;
+			}
+
+			const {show_my_posts, show_original_reblogs, active_in_peepr, hide_posts_generic, hide_posts_completely} = XKit.extensions.show_originals.preferences;
+			const {blogs_to_exclude, my_blogs} = XKit.extensions.show_originals;
+			const {rebloggedFromUrl, rebloggedFromName, rebloggedRootName, blogName} = await XKit.interface.react.post_props($this.attr('data-id'));
+
+			// Don't hide posts that aren't reblogs
+			if (!rebloggedFromUrl) { return; }
+
+			// If enabled, don't hide reblogs with the same blog as root
+			if (show_original_reblogs.value && rebloggedRootName == blogName) { return; }
+
+			//Don't hide my posts
+			if (show_my_posts.value && my_blogs.includes(blogName)) { return; }
+
+			if (show_my_posts.value && blogs_to_exclude.includes(blogName)) { return; }
+
+			// Unless enabled, don't hide posts in the sidebar
+			const inSidebar = $this.closest("#glass-container").length > 0;
+			if (!active_in_peepr && inSidebar) { return; }
+
+			// We haven't returned, so hide the post now:
+
+			XKit.extensions.show_originals.experimental_count++;
+			console.log(XKit.extensions.show_originals.experimental_count);
+			if (XKit.extensions.show_originals.experimental_count > 100) {
+				$("._2hdQN").css("background", "darkslateblue");
+				XKit.post_listener.remove('showoriginals', this.react_do_reduced);
+			}
+
+			if (hide_posts_completely.value && !inSidebar) {
+				$this.addClass('showoriginals-hidden-completely');
+
+			} else if (hide_posts_generic.value) {
+				$this.addClass('showoriginals-hidden');
+				$this.prepend('<div class="showoriginals-hidden-note">hidden reblog</div>');
+
+			} else {
+				$this.addClass('showoriginals-hidden');
+
+				const reblogicon = '<svg viewBox="0 0 12.3 13.7" width="24" height="14" fill="var(--blog-contrasting-title-color,var(--transparent-white-65))" fill-opacity="0.75"><path d="M9.2.2C8.7-.2 8 .2 8 .8v1.1H3.1c-2 0-3.1 1-3.1 2.6v1.9c0 .5.4.9.9.9.1 0 .2 0 .3-.1.3-.1.6-.5.6-.8V5.2c0-1.4.3-1.5 1.3-1.5H8v1.1c0 .6.7 1 1.2.6l3.1-2.6L9.2.2zM12 7.4c0-.5-.4-.9-.9-.9s-.9.4-.9.9v1.2c0 1.4-.3 1.5-1.3 1.5H4.3V9c0-.6-.7-.9-1.2-.5L0 11l3.1 2.6c.5.4 1.2.1 1.2-.5v-1.2h4.6c2 0 3.1-1 3.1-2.6V7.4z"></path></svg>';
+				const note_text = `${blogName} ${reblogicon} ${rebloggedFromName}`;
+				const aria_label = `hidden post: ${blogName} reblogged a post from ${rebloggedFromName}`;
+				const button = '<div class="xkit-button showoriginals-hidden-button">show reblog</div>';
+
+				$this.prepend(`<div class="showoriginals-hidden-note" aria-label="${aria_label}">${note_text}${button}</div>`);
+
+				// add listener to unhide the post on button click
+				$this.on('click', '.showoriginals-hidden-button', XKit.extensions.show_originals.unhide_post);
+			}
+
+		});
+	},
+
+	react_do_none: function() {
+
+		if (XKit.extensions.show_originals.preferences.use_sidebar_toggle.value && XKit.extensions.show_originals.status == "false") {
+			$('.showoriginals-done').removeClass('showoriginals-done');
+			$('.showoriginals-hidden').removeClass('showoriginals-hidden');
+			$('.showoriginals-hidden-completely').removeClass('showoriginals-hidden-completely');
+			$('.showoriginals-hidden-note').remove();
+			return;
+		}
+
+		//runs on each post
+		$(XKit.extensions.show_originals.reblogAttributionSelectorTwo).each(function() {
+			const $thisReblogAttribution = $(this).addClass('showoriginals-done');
+
+			const $this = $thisReblogAttribution.closest("[data-id]");
+
+			const {show_my_posts, show_original_reblogs, active_in_peepr, hide_posts_generic, hide_posts_completely} = XKit.extensions.show_originals.preferences;
+			const {blogs_to_exclude, my_blogs, rebloggedFromNameSelector, avatarWrapperSelector} = XKit.extensions.show_originals;
+			//const {rebloggedFromName, rebloggedRootName, blogName} = await XKit.interface.react.post_props($this.attr('data-id'));
+
+			const blogName = $thisReblogAttribution.prev().text();
+			//console.log(blogName);
+			const rebloggedFromName = $thisReblogAttribution.children(rebloggedFromNameSelector).text();
+			//console.log(rebloggedFromName);
+
+			const $header = $thisReblogAttribution.closest("header");
+			const $avatars = $header.nextAll().find(avatarWrapperSelector).find("a");
+			const rebloggedRootNames = $avatars.map(function() {
+				return $(this).attr("title");
+			}).get();
+			//console.log(rebloggedRootNames);
+
+			// If enabled, don't hide reblogs with the same blog as root
+			if (show_original_reblogs.value && rebloggedRootNames.includes(blogName)) { return; }
+
+			//Don't hide my posts
+			if (show_my_posts.value && my_blogs.includes(blogName)) { return; }
+
+			if (show_my_posts.value && blogs_to_exclude.includes(blogName)) { return; }
+
+			// Unless enabled, don't hide posts in the sidebar
+			const inSidebar = $this.closest("#glass-container").length > 0;
+			if (!active_in_peepr && inSidebar) { return; }
+
+			// We haven't returned, so hide the post now:
+
+			XKit.extensions.show_originals.experimental_count++;
+			console.log(XKit.extensions.show_originals.experimental_count);
+			if (XKit.extensions.show_originals.experimental_count > 100) {
+				$("._2hdQN").css("background", "darkslateblue");
+				XKit.post_listener.remove('showoriginals', this.react_do_none);
+			}
+
+			if (hide_posts_completely.value && !inSidebar) {
+				$this.addClass('showoriginals-hidden-completely');
+
+			} else if (hide_posts_generic.value) {
+				$this.addClass('showoriginals-hidden');
+				$this.prepend('<div class="showoriginals-hidden-note">hidden reblog</div>');
+
+			} else {
+				$this.addClass('showoriginals-hidden');
+
+				const reblogicon = '<svg viewBox="0 0 12.3 13.7" width="24" height="14" fill="var(--blog-contrasting-title-color,var(--transparent-white-65))" fill-opacity="0.75"><path d="M9.2.2C8.7-.2 8 .2 8 .8v1.1H3.1c-2 0-3.1 1-3.1 2.6v1.9c0 .5.4.9.9.9.1 0 .2 0 .3-.1.3-.1.6-.5.6-.8V5.2c0-1.4.3-1.5 1.3-1.5H8v1.1c0 .6.7 1 1.2.6l3.1-2.6L9.2.2zM12 7.4c0-.5-.4-.9-.9-.9s-.9.4-.9.9v1.2c0 1.4-.3 1.5-1.3 1.5H4.3V9c0-.6-.7-.9-1.2-.5L0 11l3.1 2.6c.5.4 1.2.1 1.2-.5v-1.2h4.6c2 0 3.1-1 3.1-2.6V7.4z"></path></svg>';
+				const note_text = `${blogName} ${reblogicon} ${rebloggedFromName}`;
+				const aria_label = `hidden post: ${blogName} reblogged a post from ${rebloggedFromName}`;
+				const button = '<div class="xkit-button showoriginals-hidden-button">show reblog</div>';
+
+				$this.prepend(`<div class="showoriginals-hidden-note" aria-label="${aria_label}">${note_text}${button}</div>`);
+
+				// add listener to unhide the post on button click
+				$this.on('click', '.showoriginals-hidden-button', XKit.extensions.show_originals.unhide_post);
+			}
+
+		});
+	},
+
+	react_do_ultranone: function() {
+
+		if (XKit.extensions.show_originals.preferences.use_sidebar_toggle.value && XKit.extensions.show_originals.status == "false") {
+			$('.showoriginals-done').removeClass('showoriginals-done');
+			$('.showoriginals-hidden').removeClass('showoriginals-hidden');
+			$('.showoriginals-hidden-completely').removeClass('showoriginals-hidden-completely');
+			$('.showoriginals-hidden-note').remove();
+			return;
+		}
+
+		//runs on each post
+		$(XKit.extensions.show_originals.reblogAttributionSelectorTwo).each(function() {
+			const $thisReblogAttribution = $(this).addClass('showoriginals-done');
+
+			const $this = $thisReblogAttribution.closest("[data-id]");
+
+			const {show_my_posts, show_original_reblogs, active_in_peepr, hide_posts_generic, hide_posts_completely} = XKit.extensions.show_originals.preferences;
+			const {blogs_to_exclude, my_blogs, rebloggedFromNameSelector, avatarWrapperSelector} = XKit.extensions.show_originals;
+			//const {rebloggedFromName, rebloggedRootName, blogName} = await XKit.interface.react.post_props($this.attr('data-id'));
+
+
+			// Unless enabled, don't hide posts in the sidebar
+			const inSidebar = $this.closest("#glass-container").length > 0;
+			if (!active_in_peepr && inSidebar) { return; }
+
+			// We haven't returned, so hide the post now:
+
+			XKit.extensions.show_originals.experimental_count++;
+			console.log(XKit.extensions.show_originals.experimental_count);
+			if (XKit.extensions.show_originals.experimental_count > 100) {
+				$("._2hdQN").css("background", "darkslateblue");
+				XKit.post_listener.remove('showoriginals', this.react_do_none);
+			}
+
+			if (hide_posts_completely.value && !inSidebar) {
+				$this.addClass('showoriginals-hidden-completely');
+
+			} else {
+				$this.addClass('showoriginals-hidden');
+				$this.prepend('<div class="showoriginals-hidden-note">hidden reblog</div>');
+			}
+
+
+		});
+	},
+
+
 
 	unhide_post: function(e) {
 		const $button = $(e.target);
