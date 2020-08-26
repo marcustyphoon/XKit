@@ -13,6 +13,29 @@ XKit.extensions.fix_logo_performance = new Object({
 		this.running = true;
 
 		await XKit.css_map.getCssMap();
+		this.remove_logo_animation();
+
+	},
+
+	remove_logo_animation: function() {
+
+		XKit.tools.add_css(`
+			#pattern-rainbowColorList {
+				display: none;
+			}
+			svg[fill="url('#pattern-rainbowColorList')"] {
+				fill: var(--white-on-dark);
+			}
+		`, "fix_logo_performance");
+
+		$("#pattern-rainbowColorList").remove();
+
+	},
+
+	fix_logo: function() {
+
+		//this doesn't work until you mouse over it once since it starts animating on tumblr page load
+
 		const logoSelector = XKit.css_map.keyToCss("logo");
 
 		const $svg = $(logoSelector).find("svg").attr("id", "logo");
