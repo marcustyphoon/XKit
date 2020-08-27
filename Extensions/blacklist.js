@@ -209,7 +209,7 @@ XKit.extensions.blacklist = new Object({
 
 		}
 
-		XKit.interface.hide("xblacklist_hidden_post", "blacklist");
+		XKit.interface.hide(".xblacklist_hidden_post", "blacklist");
 
 		if ($(postSel).length > 0) {
 			XKit.post_listener.add("blacklist", XKit.extensions.blacklist.check);
