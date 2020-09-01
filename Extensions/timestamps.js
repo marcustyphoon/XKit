@@ -154,9 +154,13 @@ XKit.extensions.timestamps = new Object({
 					XKit.post_listener.add("timestamps", this.react_add_timestamps);
 				}
 
+				var debounce_timer = null;
 				if (this.preferences.reblogs.value !== "off") {
 					this.react_add_reblog_timestamps();
-					XKit.post_listener.add("timestamps", this.react_add_reblog_timestamps);
+					XKit.post_listener.add("timestamps", () => {
+						clearTimeout(debounce_timer);
+						debounce_timer = setTimeout(this.react_add_reblog_timestamps, 500);
+					});
 				}
 
 				if (this.preferences.only_on_hover.value) {
@@ -315,6 +319,13 @@ XKit.extensions.timestamps = new Object({
 		.addClass("xkit_reblog_timestamps")
 		.each(async function() {
 			const $post = $(this);
+			if ($post.hasClass("norecommended-hidden") ||
+				$post.hasClass("xblacklist_blacklisted_post") ||
+				$post.hasClass("xmute-muted") ||
+				$post.hasClass("xpostblock-hidden") ||
+				$post.hasClass("showoriginals-hidden")) {
+				return;
+			}
 			const post_id = $post.attr("data-id");
 			const {trail} = await XKit.interface.react.post_props(post_id);
 			var $reblogs = $post.find(reblogs_class);
