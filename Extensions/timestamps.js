@@ -327,7 +327,9 @@ XKit.extensions.timestamps = new Object({
 		if (timestamp) {
 			date_element.html(this.format_date(moment(new Date(timestamp * 1000))));
 			date_element.removeClass("xtimestamp-loading");
-			XKit.storage.set("timestamps", "xkit_timestamp_cache_" + post_id, timestamp);
+			if (XKit.extensions.timestamps.preferences.reblogs.value !== "off") {
+				XKit.storage.set("timestamps", "xkit_timestamp_cache_" + post_id, timestamp);
+			}
 		} else {
 			this.show_failed(date_element);
 		}
