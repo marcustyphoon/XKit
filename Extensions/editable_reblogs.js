@@ -248,8 +248,6 @@ XKit.extensions.editable_reblogs = new Object({
 			converted_trail = `<p><a class="tumblr_blog" href="${url}">${author.trim()}</a>\u200B:</p>\n<blockquote>${converted_trail}${content}</blockquote>`;
 		});
 
-		/* throw new Error('hey'); */
-
 		try {
 			old_content = XKit.interface.post_window.get_content_html();
 		} catch (e) {
@@ -489,7 +487,7 @@ XKit.extensions.editable_reblogs = new Object({
 
 		var text = XKit.interface.post_window.get_content_html();
 
-		var nodes = $('<div>').append($(/* '<' + */ text));
+		var nodes = $('<div>').append($(text));
 		nodes.find('.tmblr-truncated').replaceWith('[[MORE]]');
 		XKit.extensions.editable_reblogs.format_video_media(nodes);
 
@@ -566,7 +564,7 @@ XKit.extensions.editable_reblogs = new Object({
 			XKit.tools.Nx_XHR({
 				method: "POST",
 				url: "https://www.tumblr.com/svc/post/update",
-				data: JSON.stringify(/* '>' + */ request),
+				data: JSON.stringify(request),
 				json: true,
 				headers: {
 					"X-tumblr-puppies": kitty_data.kitten,
