@@ -139,6 +139,16 @@ XKit.extensions.editable_reblogs = new Object({
 		return $('.xkit-er-edit-button')[0];
 	},
 
+	// patches XKit.tools.github_issue's behavior of only logging the error.stack property
+	github_issue: function(title, data, { message, stack, status, responseText }) {
+		const errorText = Object.entries({ message, stack, status, responseText })
+			.filter(([key, value]) => value)
+			.map(([key, value]) => `${key}: \n${value}`)
+			.join('\n\n');
+
+		return XKit.tools.github_issue(title, data, { stack: errorText });
+	},
+
 	edit_the_reblogs: function() {
 		try {
 			var save_button = $('.post-form--save-button [data-js-clickablesave]');
@@ -153,7 +163,7 @@ XKit.extensions.editable_reblogs = new Object({
 			this.get_post_save_button().attr("data-js-clickablesave", "");
 
 			if (!e.hide_popup) {
-				var github_url = XKit.tools.github_issue("Editable Reblogs " + this.state + " error",
+				var github_url = this.github_issue("Editable Reblogs " + this.state + " error",
 					{ state: this.state, "ER Version": XKit.installed.get("editable_reblogs").version },
 				e);
 
@@ -237,6 +247,8 @@ XKit.extensions.editable_reblogs = new Object({
 		trail_data.forEach(({url, author, content}) => {
 			converted_trail = `<p><a class="tumblr_blog" href="${url}">${author.trim()}</a>\u200B:</p>\n<blockquote>${converted_trail}${content}</blockquote>`;
 		});
+
+		/* throw new Error('hey'); */
 
 		try {
 			old_content = XKit.interface.post_window.get_content_html();
@@ -335,7 +347,7 @@ XKit.extensions.editable_reblogs = new Object({
 		} catch (e) {
 			console.error(e);
 
-			var github_url = XKit.tools.github_issue("Editable Reblogs post error",
+			var github_url = this.github_issue("Editable Reblogs post error",
 				{ state: this.state, "ER Version": XKit.installed.get("editable_reblogs").version },
 			e);
 
@@ -477,7 +489,7 @@ XKit.extensions.editable_reblogs = new Object({
 
 		var text = XKit.interface.post_window.get_content_html();
 
-		var nodes = $('<div>').append($(text));
+		var nodes = $('<div>').append($(/* '<' + */ text));
 		nodes.find('.tmblr-truncated').replaceWith('[[MORE]]');
 		XKit.extensions.editable_reblogs.format_video_media(nodes);
 
@@ -554,7 +566,7 @@ XKit.extensions.editable_reblogs = new Object({
 			XKit.tools.Nx_XHR({
 				method: "POST",
 				url: "https://www.tumblr.com/svc/post/update",
-				data: JSON.stringify(request),
+				data: JSON.stringify(/* '>' + */ request),
 				json: true,
 				headers: {
 					"X-tumblr-puppies": kitty_data.kitten,
@@ -564,9 +576,11 @@ XKit.extensions.editable_reblogs = new Object({
 				onerror: function(response) {
 					XKit.interface.kitty.set("");
 
-					var github_url = XKit.tools.github_issue("Editable Reblogs posting error",
+					const requestText = '`' + request["post[two]"].replace('\n', '') + '`';
+
+					var github_url = XKit.extensions.editable_reblogs.github_issue("Editable Reblogs posting error",
 						{ "ER Version": XKit.installed.get("editable_reblogs").version,
-						 user: request.channel_id, body: request["post[two]"]}, {stack: response});
+						 user: request.channel_id, body: requestText}, response);
 
 					XKit.window.show("Error",
 						"Error: XER-SR.<br><br>There was an error reblogging your post. Please try again shortly. " +
