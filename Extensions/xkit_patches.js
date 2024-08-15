@@ -19,7 +19,7 @@ XKit.extensions.xkit_patches = new Object({
 		if (XKit.browser().firefox === true && XKit.storage.get("xkit_patches", "w_edition_warned") !== "true") {
 			let version = XKit.tools.parse_version(XKit.version);
 			if (version.major === 7 && version.minor >= 8) {
-				fetch(browser.extension.getURL("manifest.json")) // eslint-disable-line no-undef
+				fetch(browser.runtime.getURL("manifest.json")) // eslint-disable-line no-undef
 					.then(response => response.json())
 					.then(responseData => {
 						if (responseData.applications.gecko.id === "@new-xkit-w") {
@@ -83,41 +83,12 @@ XKit.extensions.xkit_patches = new Object({
 
 		window.addEventListener("message", XKit.blog_listener.eventHandler);
 
-		// Scrape Tumblr's data object now that we can run add_function
-		const blog_scraper = XKit.page.react ?
-			function() {
-				/* globals tumblr */
-				let blogs = [];
-				Promise.race([
-					new Promise((resolve) => setTimeout(resolve, 30000)),
-					(async () => {
-						const {response} = await tumblr.apiFetch("/v2/user/info", {
-							queryParams: {'fields[blogs]': 'name'},
-						});
-						blogs = response.user.blogs.map(blog => blog.name);
-					})()
-				]).finally(() => {
-					window.postMessage({
-						xkit_blogs: blogs
-					}, window.location.protocol + "//" + window.location.host);
-				});
-			} :
-			function() {
-				var blogs = [];
-				try {
-					var models = Tumblr.dashboardControls.allTumblelogs;
-					models.filter(function(model) {
-						return model.attributes.hasOwnProperty("is_current");
-					}).forEach(function(model) {
-						blogs.push(model.attributes.name);
-					});
-				} catch (e) {} finally {
-					window.postMessage({
-						xkit_blogs: blogs
-					}, window.location.protocol + "//" + window.location.host);
-				}
-			};
-		XKit.tools.add_function(blog_scraper, true);
+		// Scrape Tumblr's data object
+		XKit.tools.inject(
+			XKit.page.react
+				? "/main_world/xkit_patches/blog_scraper_react.js"
+				: "/main_world/xkit_patches/blog_scraper.js"
+		);
 
 		XKit.tools.add_function(function fix_autoplaying_yanked_videos() {
 
@@ -179,10 +150,10 @@ XKit.extensions.xkit_patches = new Object({
 		}, 1000);
 	},
 
-	run_order: ["7.8.1", "7.8.2", "7.9.0", "7.9.1", "7.9.2"],
+	run_order: ["7.8.1", "7.8.2", "7.9.0", "7.9.1", "7.9.2", "7.10.0"],
 
 	patches: {
-		"7.9.2": function() {
+		"7.10.0": function() {
 
 			/**
 			 * Given a list of different collections in `items`, return all
@@ -319,17 +290,6 @@ XKit.extensions.xkit_patches = new Object({
 			 * @return {Promise} - resolves with the translated key
 			 */
 			XKit.interface.translate = key => new Promise(resolve => {
-				function grabLanguageData() {
-					const waitForTumblrObject = setInterval(() => {
-						if (window.tumblr) {
-							clearInterval(waitForTumblrObject);
-							window.postMessage({
-								languageData: window.tumblr.languageData
-							}, `${location.protocol}//${location.host}`);
-						}
-					}, 100);
-				}
-
 				function receiveLanguageData(e) {
 					if (e.origin === `${location.protocol}//${location.host}` && e.data.languageData !== undefined) {
 						window.removeEventListener("message", receiveLanguageData);
@@ -350,7 +310,7 @@ XKit.extensions.xkit_patches = new Object({
 					resolve(XKit.interface.translations[key]);
 				} else {
 					window.addEventListener("message", receiveLanguageData);
-					XKit.tools.add_function(grabLanguageData, true);
+					XKit.tools.inject("/main_world/xkit_patches/grab_language_data.js");
 				}
 			});
 
@@ -687,14 +647,7 @@ XKit.extensions.xkit_patches = new Object({
 						return this.cssMap;
 					}
 
-					this.cssMap = await XKit.tools.async_add_function(async () => {
-						if (!window.tumblr) {
-							return null;
-						}
-						const cssMap = await window.tumblr.getCssMap();
-						return cssMap;
-					});
-					return this.cssMap;
+					this.cssMap = await XKit.tools.inject("/main_world/xkit_patches/css_map.js");
 				},
 
 				keyToClasses: function(key) {
@@ -752,47 +705,6 @@ XKit.extensions.xkit_patches = new Object({
 					}
 				}
 
-				function send() {
-					var request = add_tag;
-					var xhr = new XMLHttpRequest();
-					xhr.open(request.method, request.url, request.async || true);
-
-					if (request.json === true) {
-						xhr.setRequestHeader("Content-type", "application/json");
-					}
-					for (var header in request.headers) {
-						xhr.setRequestHeader(header, request.headers[header]);
-					}
-
-					function callback(result) {
-						var bare_headers = xhr.getAllResponseHeaders().split("\r\n");
-						var cur_headers = {}, splitter;
-						for (var x in bare_headers) {
-							splitter = bare_headers[x].indexOf(":");
-							if (splitter === -1) { continue; }
-							cur_headers[bare_headers[x].substring(0, splitter).trim().toLowerCase()] = bare_headers[x].substring(splitter + 1).trim();
-						}
-						window.postMessage({
-							response: {
-								status: xhr.status,
-								responseText: xhr.response,
-								headers: cur_headers
-							},
-							timestamp: "xkit_" + request.timestamp,
-							success: result
-						}, window.location.protocol + "//" + window.location.host);
-					}
-
-					xhr.onerror = function() { callback(false); };
-					xhr.onload = function() { callback(true); };
-
-					if (typeof request.data !== "undefined") {
-						xhr.send(request.data);
-					} else {
-						xhr.send();
-					}
-				}
-
 				function receive(e) {
 					if (e.origin === window.location.protocol + "//" + window.location.host && e.data.timestamp === "xkit_" + details.timestamp) {
 						window.removeEventListener("message", receive);
@@ -815,7 +727,7 @@ XKit.extensions.xkit_patches = new Object({
 				}
 
 				window.addEventListener("message", receive);
-				XKit.tools.add_function(send, true, details);
+				XKit.tools.inject("/main_world/xkit_patches/Nx_XHR.js", [details]);
 
 			});
 
@@ -884,18 +796,7 @@ XKit.extensions.xkit_patches = new Object({
 
 			XKit.interface.react = {
 				post_props: async function(post_id) {
-					// eslint-disable-next-line no-shadow
-					return XKit.tools.async_add_function(({post_id}) => {
-						const keyStartsWith = (obj, prefix) =>
-							Object.keys(obj).find(key => key.startsWith(prefix));
-						const element = document.querySelector(`[data-id="${post_id}"]`);
-						let fiber = element[keyStartsWith(element, '__reactFiber')];
-
-						while (fiber.memoizedProps.timelineObject === undefined) {
-							fiber = fiber.return;
-						}
-						return fiber.memoizedProps.timelineObject;
-					}, {post_id});
+					return XKit.tools.inject("/main_world/xkit_patches/post_props.js", [post_id]);
 				},
 
 				post: async function($element) {
@@ -1176,6 +1077,10 @@ XKit.extensions.xkit_patches = new Object({
 				destroy_collapsed: function(id) {
 					$(`.${id}-collapsed`).removeClass(`${id}-collapsed`);
 					$(`.${id}-collapsed-note`).remove();
+				},
+
+				api_fetch: async function(resource, init) {
+					return XKit.tools.inject("/main_world/xkit_patches/api_fetch.js", [{ resource, init, headerVersion: XKit.version }]);
 				}
 			};
 
@@ -1275,6 +1180,8 @@ XKit.extensions.xkit_patches = new Object({
 				XKit.tools.add_css(`${selector} {height: 0; margin: 0; overflow: hidden;}`, extension);
 			};
 		},
+
+		"7.9.2": function() {},
 
 		"7.9.1": function() {},
 

@@ -718,7 +718,7 @@ XKit.extensions.servant = new Object({
 
 		run_js: {
 
-			text: "Run Javascript Code",
+			text: "Run Javascript Code (disabled)",
 			compatibility: "",
 			type: "textarea",
 			placeholder: "ie: 'if (mary.has_lamb == true) {\n\treturn true;\n }'",
@@ -726,6 +726,7 @@ XKit.extensions.servant = new Object({
 
 			run: function(parameter, returns) {
 
+				/*
 				var m_object = {};
 
 				var m_return = false;
@@ -741,6 +742,7 @@ XKit.extensions.servant = new Object({
 				m_object.return = "";
 
 				return m_object;
+				*/
 
 			}
 
@@ -1115,7 +1117,7 @@ XKit.extensions.servant = new Object({
 
 		run_js: {
 
-			text: "Run Javascript Code",
+			text: "Run Javascript Code (disabled)",
 			compatibility: "",
 			type: "textarea",
 			placeholder: "ie: 'alert(&quot;%1 happened!&quot;);'",
@@ -1123,6 +1125,7 @@ XKit.extensions.servant = new Object({
 
 			run: function(parameter, returns, to_pass, compatibility) {
 
+				/*
 				var parameter_fixed = parameter;
 
 				for (var i = 0; i <= 10; i++) {
@@ -1143,6 +1146,7 @@ XKit.extensions.servant = new Object({
 				}
 
 				eval(parameter_fixed + "\n//# sourceURL=xkit/servant/servant" + (new Date()).getTime() + ".js");
+				*/
 
 			}
 

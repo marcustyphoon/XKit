@@ -292,8 +292,7 @@ XKit.extensions.classic_tags = new Object({
 		this.search_input = $container.find("input[name='q']");
 		this.placeholder = this.search_input.attr("placeholder");
 
-		this.tags = await XKit.tools.async_add_function(async () => {
-			const result = await window.tumblr.apiFetch("/v2/user/followed_tags", { method: "GET", queryParams: { limit: 20 } });
+		this.tags = await XKit.interface.react.api_fetch("/v2/user/followed_tags", {method: "GET", queryParams: {limit: 20}}).then(result => {
 			const tag_expression = new RegExp(/^#?(.+)/);
 
 			return {

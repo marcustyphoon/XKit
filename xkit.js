@@ -47,7 +47,7 @@ var xkit_global_start = Date.now();  // log start timestamp
 			}
 
 		},
-		init_normal: function() {
+		init_normal: async function() {
 
 			try {
 
@@ -109,7 +109,7 @@ var xkit_global_start = Date.now();  // log start timestamp
 				if (!xkit_main.errors && xkit_main.script) {
 					console.log("Trying to run xkit_main.");
 					try {
-						eval(xkit_main.script + "\n//# sourceURL=xkit/xkit_main.js");
+						await import(browser.runtime.getURL("/Extensions/xkit_main.js"));
 						XKit.extensions.xkit_main.run();
 					} catch (e) {
 						show_error_reset("Can't run xkit_main: " + e.message);
@@ -134,7 +134,7 @@ var xkit_global_start = Date.now();  // log start timestamp
 				show_error_update("xkit_init(): " + e.message);
 			}
 		},
-		init_frame: function() {
+		init_frame: async function() {
 
 			// Load frame extensions.
 			// First lets check if it actually exists.
@@ -148,7 +148,7 @@ var xkit_global_start = Date.now();  // log start timestamp
 			if (!xkit_main.errors && xkit_main.script) {
 				console.log("Trying to run xkit_main.");
 				try {
-					eval(xkit_main.script + "\n//# sourceURL=xkit/xkit_main.js");
+					await import(browser.runtime.getURL("/Extensions/xkit_main.js"));
 					XKit.frame_mode = true;
 					XKit.extensions.xkit_main.run();
 				} catch (e) {
@@ -1317,6 +1317,8 @@ var xkit_global_start = Date.now();  // log start timestamp
 			Nx_XHR: function(details) {
 				details.timestamp = new Date().getTime() + Math.random();
 
+				XKit.tools.inject("/main_world/xkit/Nx_XHR.js", [details]);
+				/*
 				XKit.tools.add_function(function() {
 					var xhr = new XMLHttpRequest();
 					xhr.open(add_tag.method, add_tag.url, add_tag.async || true);
@@ -1356,6 +1358,7 @@ var xkit_global_start = Date.now();  // log start timestamp
 						xhr.send();
 					}
 				}, true, details);
+				*/
 
 				function handler(e) {
 					if (e.origin === window.location.protocol + "//" + window.location.host && e.data.timestamp === "xkit_" + details.timestamp) {
@@ -1604,7 +1607,36 @@ var xkit_global_start = Date.now();  // log start timestamp
 						true
 					);
 				});
-			}
+			},
+
+			/**
+			 * Copies a function from the addon context into the page context
+			 * and returns the result of the function as a promise.
+			 *
+			 * See the main_world directory and [../main_world/index.js](../main_world/index.js).
+			 * @param {string} path - Absolute path of script to inject (will be fed to `runtime.getURL()`)
+			 * @param {Array} [args] - Array of arguments to pass to the script
+			 * @param {Element} [target] - Target element; will be accessible as the `this` value in the injected function.
+			 * @returns {Promise<any>} The transmitted result of the script
+			 */
+			inject: (path, args = [], target = document.documentElement) =>
+				new Promise((resolve, reject) => {
+					const requestId = String(Math.random());
+					const data = {path: browser.runtime.getURL(path), args, id: requestId};
+
+					const responseHandler = ({detail}) => {
+						const {id, result, exception} = JSON.parse(detail);
+						if (id !== requestId) return;
+
+						target.removeEventListener("newxkitinjectionresponse", responseHandler);
+						exception ? reject(exception) : resolve(result);
+					};
+					target.addEventListener("newxkitinjectionresponse", responseHandler);
+
+					target.dispatchEvent(
+						new CustomEvent("newxkitinjectionrequest", {detail: JSON.stringify(data), bubbles: true})
+					);
+				}),
 		},
 		interface: {
 			revision: 2,
@@ -3208,7 +3240,7 @@ var xkit_global_start = Date.now();  // log start timestamp
 		special: {
 
 			force_update: function() {
-				XKit.install("xkit_updates", data => {
+				XKit.install("xkit_updates", async data => {
 					if (data.errors) {
 						if (data.storage_error === true) {
 							show_error_installation("[Code: 401] Storage error: " + data.error);
@@ -3223,7 +3255,7 @@ var xkit_global_start = Date.now();  // log start timestamp
 					}
 
 					try {
-						eval(data.script + "\n//# sourceURL=xkit/xkit_updates.js");
+						await import(browser.runtime.getURL("/Extensions/xkit_updates.js"));
 						XKit.window.show("Forcing Extension Updates",
 							"Please do not navigate away from this page. Your extensions are being updated for compatibility with the latest XKit version." +
 							'<div id="xkit-forced-auto-updates-message">Initializing...</div>', "info");
@@ -3328,7 +3360,7 @@ function show_message(title, msg, icon, buttons) {
 	});
 }
 
-function xkit_init_special() {
+async function xkit_init_special() {
 
 	$("body").html("");
 	document.title = "XKit";
@@ -3354,12 +3386,11 @@ function xkit_init_special() {
 
 	if (document.location.href.indexOf("/xkit_editor") !== -1) {
 		if (typeof(browser) !== 'undefined') {
-			/* global browser */
 			var xhr = new XMLHttpRequest();
-			xhr.open('GET', browser.extension.getURL('editor.js'), false);
+			xhr.open('GET', browser.runtime.getURL('editor.js'), false);
 			xhr.send(null);
 			try {
-				eval(xhr.responseText + "\n//# sourceURL=xkit/editor.js");
+				await import(browser.runtime.getURL("/Extensions/xkit_editor.js"));
 				XKit.extensions.xkit_editor.run();
 			} catch (e) {
 				XKit.window.show("Can't launch XKit Editor", "<p>" + e.message + "</p>", "error", "<div id=\"xkit-close-message\" class=\"xkit-button default\">OK</div>");
@@ -3540,7 +3571,7 @@ function xkit_install() {
 	XKit.window.show("Welcome to New XKit " + framework_version + "!", "<b>Please wait while I initialize the setup. This might take a while.<br/>Please do not navigate away from this page.</b>", "info");
 	console.log("Trying to retrieve XKit Installer.");
 
-	XKit.install("xkit_installer", function(mdata) {
+	XKit.install("xkit_installer", async function(mdata) {
 		if (mdata.errors) {
 			if (mdata.storage_error === true) {
 				show_error_installation("[Code: 401] Storage error: " + mdata.error);
@@ -3555,7 +3586,7 @@ function xkit_install() {
 		}
 
 		try {
-			eval(mdata.script + "\n//# sourceURL=xkit/xkit_installer.js");
+			await import(browser.runtime.getURL("/Extensions/xkit_installer.js"));
 			XKit.extensions.xkit_installer.run();
 		} catch (e) {
 			show_error_installation("[Code: 102] " + e.message);

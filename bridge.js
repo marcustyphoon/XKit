@@ -8,7 +8,7 @@
 
 */
 
-/* globals chrome, browser, msBrowser */
+/* globals msBrowser */
 
 if (typeof(browser) === 'undefined') {
 	if (typeof(chrome) !== 'undefined') {
@@ -51,7 +51,7 @@ function getBridgeError() { // eslint-disable-line no-redeclare
 
 function getVersion() {
 	var xhr = new XMLHttpRequest();
-	xhr.open('GET', browser.extension.getURL('manifest.json'), false);
+	xhr.open('GET', browser.runtime.getURL('manifest.json'), false);
 	xhr.send(null);
 	var manifest = JSON.parse(xhr.responseText);
 	return manifest.version;

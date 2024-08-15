@@ -60,7 +60,7 @@
 				}
 
 				try {
-					eval(extension.script + "\n//# sourceURL=xkit/" + extension.id + ".js");
+					await import(browser.runtime.getURL(`/Extensions/${extension.id}.js`));
 
 					if (typeof XKit.extensions[extension.id].preferences !== "undefined") {
 						this.load_extension_preferences(extension.id);

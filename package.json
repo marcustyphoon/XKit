@@ -9,6 +9,7 @@
     "test": "eslint .",
     "lint": "web-ext lint",
     "build": "web-ext build",
+    "start": "web-ext run",
     "sign": "web-ext sign --channel unlisted"
   },
   "devDependencies": {
@@ -31,7 +32,7 @@
       ".*",
       "dev/",
       "docs/",
-      "Extensions/",
+      "Extensions/*.icon.js",
       "Themes/",
       "gulpfile.js",
       "LICENSE",
