@@ -29,7 +29,9 @@ var xkit_global_start = Date.now();  // log start timestamp
 			}
 			$(document).ready(XKit.init_extension);
 		},
-		init_extension: function() {
+		init_extension: async function() {
+			await init_main_world();
+
 			console.log("init_extension: " + JSON.stringify(XKit.page));
 			if (XKit.page.xkit) {
 				xkit_init_special();
@@ -3674,3 +3676,14 @@ function show_error_update(message) {
 	// Shortcut to call when there is a javascript error.
 	XKit.window.show("XKit ran into an error.", "<b>Generated Error message:</b><br/><p>" + message + "</p>You might need to update XKit manually. Please visit the New XKit Blog. Alternatively, you can write down the error message above and contact New XKit Support to see how you can fix this or reload the page to try again.", "error", "<div id=\"xkit-close-message\" class=\"xkit-button default\">OK</div><a href=\"https://new-xkit-extension.tumblr.com\" class=\"xkit-button\">New XKit Blog</a><a href=\"https://new-xkit-support.tumblr.com\" class=\"xkit-button\">New XKit Support</a>");
 }
+
+const init_main_world = () =>
+	new Promise(resolve => {
+		document.documentElement.addEventListener("newxkitinjectionready", resolve, {once: true});
+
+		const {nonce} = [...document.scripts].find(script => script.getAttributeNames().includes("nonce"));
+		const script = document.createElement("script");
+		script.nonce = nonce;
+		script.src = browser.runtime.getURL("/main_world/index.js");
+		document.documentElement.append(script);
+	});
