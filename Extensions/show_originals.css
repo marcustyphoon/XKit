@@ -1,9 +1,0 @@
-#new_post_buttons,
-.new_post_buttons {
-	display: block !important;
-	visibility: visible !important;
-}
-
-#container {
-	min-height: 100%;
-}
