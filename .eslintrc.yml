@@ -5,6 +5,7 @@
     es6: true
     browser: true
     jquery: true
+    webextensions: true
   extends: eslint:recommended
   rules:
     dot-notation: [error, allowPattern: "^[A-Z]"]

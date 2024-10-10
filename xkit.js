@@ -109,7 +109,7 @@ var xkit_global_start = Date.now();  // log start timestamp
 				if (!xkit_main.errors && xkit_main.script) {
 					console.log("Trying to run xkit_main.");
 					try {
-						eval(xkit_main.script + "\n//# sourceURL=xkit/xkit_main.js");
+						new Function(xkit_main.script + "\n//# sourceURL=xkit/xkit_main.js")();
 						XKit.extensions.xkit_main.run();
 					} catch (e) {
 						show_error_reset("Can't run xkit_main: " + e.message);
@@ -148,7 +148,7 @@ var xkit_global_start = Date.now();  // log start timestamp
 			if (!xkit_main.errors && xkit_main.script) {
 				console.log("Trying to run xkit_main.");
 				try {
-					eval(xkit_main.script + "\n//# sourceURL=xkit/xkit_main.js");
+					new Function(xkit_main.script + "\n//# sourceURL=xkit/xkit_main.js")();
 					XKit.frame_mode = true;
 					XKit.extensions.xkit_main.run();
 				} catch (e) {
@@ -192,29 +192,9 @@ var xkit_global_start = Date.now();  // log start timestamp
 		download: {
 			// TODO: implement as module, lose most of this code
 			github_fetch: function(path, callback) {
-				var url = 'https://new-xkit.github.io/XKit/Extensions/dist/' + path;
-				GM_xmlhttpRequest({
-					method: "GET",
-					url: url,
-					onerror: function(response) {
-						console.error("Unable to download '" + path + "'");
-						callback({errors: true, server_down: true});
-					},
-					onload: function(response) {
-						// We are done!
-						var mdata = {};
-						try {
-							mdata = JSON.parse(response.responseText);
-						} catch (e) {
-							// Server returned bad thingy.
-							console.error("Unable to download '" + path +
-										"', server returned non-json object." + e.message);
-							callback({errors: true, server_down: true});
-							return;
-						}
-						callback(mdata);
-					}
-				});
+				fetch(browser.runtime.getURL('/Extensions/dist/' + path))
+					.then(response => response.json())
+					.then(callback);
 			},
 			extension: function(extension_id, callback) {
 				XKit.download.github_fetch(extension_id + '.json', callback);
@@ -234,10 +214,6 @@ var xkit_global_start = Date.now();  // log start timestamp
 				}
 				if (page === 'paperboy/index.php') {
 					XKit.download.github_fetch('page/paperboy.json', callback);
-					return;
-				}
-				if (page === 'framework_version.php') {
-					XKit.download.github_fetch('page/framework_version.json', callback);
 					return;
 				}
 			}
@@ -3223,7 +3199,7 @@ var xkit_global_start = Date.now();  // log start timestamp
 					}
 
 					try {
-						eval(data.script + "\n//# sourceURL=xkit/xkit_updates.js");
+						new Function(data.script + "\n//# sourceURL=xkit/xkit_updates.js")();
 						XKit.window.show("Forcing Extension Updates",
 							"Please do not navigate away from this page. Your extensions are being updated for compatibility with the latest XKit version." +
 							'<div id="xkit-forced-auto-updates-message">Initializing...</div>', "info");
@@ -3354,12 +3330,11 @@ function xkit_init_special() {
 
 	if (document.location.href.indexOf("/xkit_editor") !== -1) {
 		if (typeof(browser) !== 'undefined') {
-			/* global browser */
 			var xhr = new XMLHttpRequest();
 			xhr.open('GET', browser.extension.getURL('editor.js'), false);
 			xhr.send(null);
 			try {
-				eval(xhr.responseText + "\n//# sourceURL=xkit/editor.js");
+				new Function(xhr.responseText + "\n//# sourceURL=xkit/editor.js")();
 				XKit.extensions.xkit_editor.run();
 			} catch (e) {
 				XKit.window.show("Can't launch XKit Editor", "<p>" + e.message + "</p>", "error", "<div id=\"xkit-close-message\" class=\"xkit-button default\">OK</div>");
@@ -3555,7 +3530,7 @@ function xkit_install() {
 		}
 
 		try {
-			eval(mdata.script + "\n//# sourceURL=xkit/xkit_installer.js");
+			new Function(mdata.script + "\n//# sourceURL=xkit/xkit_installer.js")();
 			XKit.extensions.xkit_installer.run();
 		} catch (e) {
 			show_error_installation("[Code: 102] " + e.message);
@@ -3576,43 +3551,8 @@ function show_error_installation(message) {
 
 		"error",
 
-		'<div id="xkit-close-message" class="xkit-button default">OK</div>' +
-		'<div id="xkit-install-troubleshooting" class="xkit-button">Troubleshooting &rarr;</div>'
+		'<div id="xkit-close-message" class="xkit-button default">OK</div>'
 	);
-
-	$("#xkit-install-troubleshooting").click(function() {
-
-		XKit.window.show(
-			"Connection Troubleshooting",
-
-			`The easiest way to determine the problem is to attempt a direct connection.
-			Use the <b>Connect</b> button to open a test page from our servers in a new tab,
-			then follow the appropriate advice:<br><br>
-
-			<b>If you can connect</b>, something local is impeding New XKit's connection to <code>new-xkit.github.io</code> -
-			this is usually another browser add-on blocking it. Be sure to whitelist the domain in any script blockers.<br><br>
-
-			<b>If you can't connect</b>, either GitHub is having issues or there's a problem with your network.
-			If GitHub Status reports 100%, try troubleshooting the error your browser gives you, or wait a while and try again if it only times out.<br><br>
-
-			<b>In either case</b>, feel free to reach out to our team for help.`,
-
-			"question",
-
-			'<a href="https://new-xkit.github.io/XKit/Test" class="xkit-button default" target="_blank">Connect</a>' +
-			'<a href="https://www.githubstatus.com" class="xkit-button" target="_blank">GitHub Status</a>' +
-			'<a href="https://new-xkit-extension.tumblr.com" class="xkit-button" target="_blank">New XKit Blog</a>' +
-			'<div id="xkit-close-message" class="xkit-button">Close</div>'
-		);
-
-		$(".xkit-window-msg code").css({
-			"font-family": "monospace",
-			"user-select": "all",
-			"-moz-user-select": "all",
-			"-webkit-user-select": "all"
-		});
-
-	});
 }
 
 function show_error_script(message) {
