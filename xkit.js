@@ -236,10 +236,6 @@ var xkit_global_start = Date.now();  // log start timestamp
 					XKit.download.github_fetch('page/paperboy.json', callback);
 					return;
 				}
-				if (page === 'framework_version.php') {
-					XKit.download.github_fetch('page/framework_version.json', callback);
-					return;
-				}
 			}
 		},
 		install: function(extension_id, callback) {
