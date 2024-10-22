@@ -47,7 +47,8 @@ var xkit_global_start = Date.now();  // log start timestamp
 			}
 
 		},
-		init_normal: function() {
+		init_normal: async function() {
+			await init_main_world();
 
 			try {
 
@@ -134,7 +135,8 @@ var xkit_global_start = Date.now();  // log start timestamp
 				show_error_update("xkit_init(): " + e.message);
 			}
 		},
-		init_frame: function() {
+		init_frame: async function() {
+			await init_main_world();
 
 			// Load frame extensions.
 			// First lets check if it actually exists.
@@ -1317,45 +1319,7 @@ var xkit_global_start = Date.now();  // log start timestamp
 			Nx_XHR: function(details) {
 				details.timestamp = new Date().getTime() + Math.random();
 
-				XKit.tools.add_function(function() {
-					var xhr = new XMLHttpRequest();
-					xhr.open(add_tag.method, add_tag.url, add_tag.async || true);
-
-					if (add_tag.json === true) {
-						xhr.setRequestHeader("Content-type", "application/json");
-					}
-					for (var header in add_tag.headers) {
-						xhr.setRequestHeader(header, add_tag.headers[header]);
-					}
-
-					function callback(result) {
-						var bare_headers = xhr.getAllResponseHeaders().split("\r\n");
-						var cur_headers = {}, splitter;
-						for (var x in bare_headers) {
-							splitter = bare_headers[x].indexOf(":");
-							if (splitter === -1) { continue; }
-							cur_headers[bare_headers[x].substring(0, splitter).trim().toLowerCase()] = bare_headers[x].substring(splitter + 1).trim();
-						}
-						window.postMessage({
-							response: {
-								status: xhr.status,
-								responseText: xhr.response,
-								headers: cur_headers
-							},
-							timestamp: "xkit_" + add_tag.timestamp,
-							success: result
-						}, window.location.protocol + "//" + window.location.host);
-					}
-
-					xhr.onerror = function() { callback(false); };
-					xhr.onload = function() { callback(true); };
-
-					if (typeof add_tag.data !== "undefined") {
-						xhr.send(add_tag.data);
-					} else {
-						xhr.send();
-					}
-				}, true, details);
+				XKit.tools.inject("/main_world/Nx_XHR_send.js", [details]);
 
 				function handler(e) {
 					if (e.origin === window.location.protocol + "//" + window.location.host && e.data.timestamp === "xkit_" + details.timestamp) {
@@ -1604,7 +1568,36 @@ var xkit_global_start = Date.now();  // log start timestamp
 						true
 					);
 				});
-			}
+			},
+
+			/**
+			 * Copies a function from the addon context into the page context
+			 * and returns the result of the function as a promise.
+			 *
+			 * See the main_world directory and [../main_world/index.js](../main_world/index.js).
+			 * @param {string} path - Absolute path of script to inject (will be fed to `runtime.getURL()`)
+			 * @param {Array} [args] - Array of arguments to pass to the script
+			 * @param {Element} [target] - Target element; will be accessible as the `this` value in the injected function.
+			 * @returns {Promise<any>} The transmitted result of the script
+			 */
+			inject: (path, args = [], target = document.documentElement) =>
+				new Promise((resolve, reject) => {
+					const requestId = String(Math.random());
+					const data = {path: browser.runtime.getURL(path), args, id: requestId};
+
+					const responseHandler = ({detail}) => {
+						const {id, result, exception} = JSON.parse(detail);
+						if (id !== requestId) return;
+
+						target.removeEventListener("newxkitinjectionresponse", responseHandler);
+						exception ? reject(exception) : resolve(result);
+					};
+					target.addEventListener("newxkitinjectionresponse", responseHandler);
+
+					target.dispatchEvent(
+						new CustomEvent("newxkitinjectionrequest", {detail: JSON.stringify(data), bubbles: true})
+					);
+				}),
 		},
 		interface: {
 			revision: 2,
@@ -3607,6 +3600,22 @@ function show_error_update(message) {
 	// Shortcut to call when there is a javascript error.
 	XKit.window.show("XKit ran into an error.", "<b>Generated Error message:</b><br/><p>" + message + "</p>You might need to update XKit manually. Please visit the New XKit Blog. Alternatively, you can write down the error message above and contact New XKit Support to see how you can fix this or reload the page to try again.", "error", "<div id=\"xkit-close-message\" class=\"xkit-button default\">OK</div><a href=\"https://new-xkit-extension.tumblr.com\" class=\"xkit-button\">New XKit Blog</a><a href=\"https://new-xkit-support.tumblr.com\" class=\"xkit-button\">New XKit Support</a>");
 }
+
+const init_main_world = () =>
+	new Promise(resolve => {
+		document.documentElement.addEventListener("newxkitinjectionready", resolve, {once: true});
+
+		const scriptWithNonce = [...document.scripts].find(script => script.getAttributeNames().includes("nonce"));
+
+		if (scriptWithNonce) {
+			const {nonce} = scriptWithNonce;
+			const script = document.createElement("script");
+			script.nonce = nonce;
+			script.src = browser.runtime.getURL("/main_world/index.js");
+			document.documentElement.append(script);
+		}
+	});
+
 
 /**
  * Functions used in place of gulp build server
