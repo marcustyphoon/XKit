@@ -29,10 +29,7 @@ XKit.extensions.panaroma = new Object({
 
 			const increase_by = header_max_width - container_max_width;
 
-			XKit.tools.async_add_function(async () => {
-				/* globals tumblr */
-				return await tumblr.getCssMap();
-			})
+			XKit.css_map.getCssMap()
 			.then(({bluespaceLayout, container, main, audioBlock, videoBlock}) => {
 				const containerSelector = container.map(x => `.${bluespaceLayout[0]} > .${x}`).join(',');
 				const mainSelector = main.map(x => `.${x}`).join(',');
