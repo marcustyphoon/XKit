@@ -120,55 +120,6 @@ XKit.extensions.xkit_patches = new Object({
 			};
 		XKit.tools.add_function(blog_scraper, true);
 
-		XKit.tools.add_function(function fix_autoplaying_yanked_videos() {
-
-			if (!window._ || !window.jQuery) {
-				return;
-			}
-
-			if (_.get(window, "Tumblr.Prima.CrtPlayer")) {
-				window.Tumblr.Prima.CrtPlayer.prototype.onLoadedMetadata =
-				_.wrap(window.Tumblr.Prima.CrtPlayer.prototype.onLoadedMetadata,
-					function(wrapped, _event) {
-						if (!this.$el.is(":visible") || !jQuery.contains(document, this.$el[0])) {
-							if (!this.$el.find('video[src^="blob:"]').length) {
-								return true;
-							}
-						}
-						return wrapped.call(this, _event);
-					});
-			}
-
-			// unfortunately we're not fast enought to catch some
-			// CRT instances that are currently instantiated, so handle those differently
-			jQuery('video').parent().each(function() {
-				this.addEventListener('loadedmetadata', function(event) {
-					var $target = jQuery(event.target);
-					if (!$target.is(":visible") || !jQuery.contains(document, event.target)) {
-						event.stopPropagation();
-					}
-				}, true); // uses .parent() and capturing to preempt tumblr's js
-			});
-		}, true, {});
-
-		XKit.tools.add_function(function fix_jk_scrolling() {
-			if (!window._ || !window.jQuery) {
-				return;
-			}
-
-			if (_.get(window, "Tumblr.KeyCommands.update_post_positions")) {
-				Tumblr.KeyCommands.update_post_positions = _.wrap(Tumblr.KeyCommands.update_post_positions,
-					function(wrapped, _event) {
-						wrapped.call(this);
-						this.post_positions = _.pick(this.post_positions,
-							function(scroll_pos, element_id) {
-								var element = jQuery("[data-pageable='" + element_id + "']");
-								return element.is(":visible") && element.height() > 0;
-							});
-					});
-			}
-		}, true, {});
-
 		setTimeout(function() {
 
 			var form_key_to_save = $('meta[name=tumblr-form-key]').attr("content");
@@ -291,30 +242,6 @@ XKit.extensions.xkit_patches = new Object({
 			};
 
 			/**
-			 * Removes the leading whitespace that occurrs on every line of
-			 * `string`, and replaces it with the string passed in as `level`.
-			 * This is often helpful for making the output of template strings
-			 * more readable, by normalizing the additional indentation that
-			 * comes with their position in a source file.
-			 *
-			 * @param {String} level - the amount of indentation to add to
-			 *     every line, as a string. May be '' for no indentation.
-			 * @param {String} string - the input string to remove and/or add
-			 *     indentation from/to.
-			 * @returns {String} - the normalized string
-			 */
-			XKit.tools.normalize_indentation = (level, string) => {
-				const lines = string.split("\n");
-				const indentation_level = _.minBy(
-					lines.map(line => line.match(/^[ \t]+/)),
-					i => i ? i[0].length : Infinity
-				) || '';
-
-				const leading_indentation = new RegExp(`^${indentation_level}`);
-				return lines.map(line => line.replace(leading_indentation, level)).join("\n");
-			};
-
-			/**
 			 * Gets redpop translation strings for selecting elements via aria labels
 			 * @param {String} key - en_US string to translate
 			 * @return {Promise} - resolves with the translated key
@@ -381,7 +308,7 @@ XKit.extensions.xkit_patches = new Object({
 					script.textContent = "var add_tag = " + JSON.stringify(addt) + ";\n";
 					script.textContent = script.textContent +
 						(exec ? "(" : "") +
-						XKit.tools.normalize_indentation('', func.toString()) +
+						func.toString() +
 						(exec ? ")();" : "");
 					if (XKit.tools.add_function_nonce) {
 						script.setAttribute('nonce', XKit.tools.add_function_nonce);
@@ -426,7 +353,7 @@ XKit.extensions.xkit_patches = new Object({
 
 					const add_func = `(async ({callback_nonce, args}) => {
 						try {
-							const return_value = await (${XKit.tools.normalize_indentation("\t".repeat(7), func.toString())})(args);
+							const return_value = await (${func.toString()})(args);
 
 							window.postMessage({
 								xkit_callback_nonce: callback_nonce,
@@ -732,7 +659,6 @@ XKit.extensions.xkit_patches = new Object({
 					).map(selectors => selectors.join(' ')).join(',');
 				},
 			};
-			_.bindAll(XKit.css_map, ['getCssMap', 'keyToClasses', 'keyToCss', 'descendantSelector']);
 
 			// eslint-disable-next-line no-async-promise-executor
 			XKit.tools.Nx_XHR = details => new Promise(async (resolve, reject) => {
