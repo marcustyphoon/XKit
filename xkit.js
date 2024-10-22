@@ -49,6 +49,7 @@ var xkit_global_start = Date.now();  // log start timestamp
 		},
 		init_normal: async function() {
 			await init_main_world();
+			await XKit.installed.init_data();
 
 			try {
 
@@ -101,10 +102,10 @@ var xkit_global_start = Date.now();  // log start timestamp
 
 				// It exists! Great.
 				var xkit_main = XKit.installed.get("xkit_main");
-				if (!xkit_main.errors && xkit_main.script) {
+				if (!xkit_main.errors) {
 					console.log("Trying to run xkit_main.");
 					try {
-						new Function(xkit_main.script + "\n//# sourceURL=xkit/xkit_main.js")();
+						await xkit_main.import();
 						XKit.extensions.xkit_main.run();
 					} catch (e) {
 						show_error_reset("Can't run xkit_main: " + e.message);
@@ -116,12 +117,6 @@ var xkit_global_start = Date.now();  // log start timestamp
 						xkit_install();
 						return;
 					}
-					if (xkit_main.error == "parse_error") {
-						// Corrupt storage? Recomment reset.
-						console.error("xkit_main is corrupt!");
-						show_error_reset("Package xkit_main is corrupted!");
-						return;
-					}
 				}
 
 			} catch (e) {
@@ -131,6 +126,7 @@ var xkit_global_start = Date.now();  // log start timestamp
 		},
 		init_frame: async function() {
 			await init_main_world();
+			await XKit.installed.init_data();
 
 			// Load frame extensions.
 			// First lets check if it actually exists.
@@ -141,10 +137,10 @@ var xkit_global_start = Date.now();  // log start timestamp
 
 			// It exists! Great.
 			var xkit_main = XKit.installed.get("xkit_main");
-			if (!xkit_main.errors && xkit_main.script) {
+			if (!xkit_main.errors) {
 				console.log("Trying to run xkit_main.");
 				try {
-					new Function(xkit_main.script + "\n//# sourceURL=xkit/xkit_main.js")();
+					await xkit_main.import();
 					XKit.frame_mode = true;
 					XKit.extensions.xkit_main.run();
 				} catch (e) {
@@ -212,9 +208,6 @@ var xkit_global_start = Date.now();  // log start timestamp
 					}
 				});
 			},
-			extension: function(extension_id, callback) {
-				getExtensionData(extension_id).then(callback);
-			},
 			page: function(page, callback) {
 				if (page === 'gallery.php') {
 					getGalleryData().then(callback);
@@ -236,13 +229,22 @@ var xkit_global_start = Date.now();  // log start timestamp
 		},
 		install: function(extension_id, callback) {
 			// Installs the extension.
-			XKit.download.extension(extension_id, function(mdata) {
+			getExtensionData(extension_id).then((data) => {
 				console.log("download.extension of '" + extension_id + "' was successful. Calling callback.");
-				install_extension(mdata, callback);
+				XKit.installed.add(extension_id, data);
+				callback(data);
 			});
 		},
 		installed: {
-			add: function(extension_id) {
+			data: {},
+			init_data: () => Promise.all(
+				XKit.installed.list().map(async extension_id => {
+					XKit.installed.data[extension_id] = await getExtensionData(extension_id);
+				})
+			),
+			add: function(extension_id, data) {
+				XKit.installed.data[extension_id] = data;
+
 				// Add extension to the installed list.
 				if (XKit.installed.check(extension_id) === true) {
 					// Already added, stop.
@@ -325,30 +327,10 @@ var xkit_global_start = Date.now();  // log start timestamp
 				setTimeout(check, 0);
 			},
 			get: function(extension_id) {
-				// Returns the object.
-				var app_data = XKit.tools.get_setting("extension_" + extension_id, "");
-				if (app_data === "") {
-					return {
-						errors: true,
-						error: "not_installed"
-					};
-				}
-				try {
-					var m_object = JSON.parse(app_data);
-					m_object.errors = false;
-					return m_object;
-				} catch (e) {
-					return {
-						errors: true,
-						error: "parse_error"
-					};
-				}
-			},
-			update: function(extension_id, new_object) {
-				XKit.tools.set_setting("extension_" + extension_id, JSON.stringify(new_object));
-				if (XKit.installed.check(extension_id) === false) {
-					XKit.installed.add(extension_id);
-				}
+				return XKit.installed.data[extension_id] || {
+					errors: true,
+					error: "not_installed"
+				};
 			},
 			enable: function(extension_id) {
 				XKit.tools.set_setting("extension__" + extension_id + "__enabled", "true");
@@ -4310,6 +4292,7 @@ async function xkit_init_special() {
 	if (document.location.href.indexOf("/xkit_editor") !== -1) {
 		if (typeof(browser) !== 'undefined') {
 			try {
+				await XKit.installed.init_data();
 				await import(browser.runtime.getURL("/editor.js"));
 				XKit.extensions.xkit_editor.run();
 			} catch (e) {
@@ -4360,138 +4343,12 @@ function xkit_check_storage() {
 
 }
 
-function install_extension(mdata, callback) {
-
-	try {
-
-		if (mdata.errors || !mdata.script) {
-			// Server returned an error or empty script.
-			console.warn("install_extension failed: Empty script or errors.");
-			return callback(mdata);
-		}
-
-		var m_object = {
-			script: mdata.script,
-			id: mdata.id
-		};
-
-		if (typeof mdata.icon !== "undefined") {
-			m_object.icon = mdata.icon;
-		} else {
-			m_object.icon = "";
-		}
-
-		if (typeof mdata.css !== "undefined") {
-			m_object.css = mdata.css;
-		} else {
-			m_object.css = "";
-		}
-
-		if (typeof mdata.title !== "undefined") {
-			m_object.title = mdata.title;
-		} else {
-			m_object.title = mdata.id;
-		}
-
-		if (typeof mdata.description !== "undefined") {
-			m_object.description = mdata.description;
-		} else {
-			m_object.description = "";
-		}
-
-		if (typeof mdata.developer !== "undefined") {
-			m_object.developer = mdata.developer;
-		} else {
-			m_object.developer = "";
-		}
-
-		if (typeof mdata.version !== "undefined") {
-			m_object.version = mdata.version;
-		} else {
-			m_object.version = "";
-		}
-
-		if (typeof mdata.frame !== "undefined") {
-			if (mdata.frame === "true" || mdata.frame === " true") {
-				m_object.frame = true;
-			} else {
-				m_object.frame = false;
-			}
-		} else {
-			m_object.frame = false;
-		}
-
-		if (typeof mdata.beta !== "undefined") {
-			if (mdata.beta === "true" || mdata.beta === " true") {
-				m_object.beta = true;
-			} else {
-				m_object.beta = false;
-			}
-		} else {
-			m_object.beta = false;
-		}
-
-		if (typeof mdata.slow !== "undefined") {
-			if (mdata.slow === "true" || mdata.slow === " true") {
-				m_object.slow = true;
-			} else {
-				m_object.slow = false;
-			}
-		} else {
-			m_object.slow = false;
-		}
-
-		if (typeof mdata.details !== "undefined") {
-			m_object.details = mdata.details;
-		} else {
-			m_object.details = "";
-		}
-
-		var m_result = XKit.tools.set_setting("extension_" + mdata.id, JSON.stringify(m_object));
-		if (m_result.errors === false) {
-			// Saved data without any errors!
-			XKit.installed.add(mdata.id);
-			var ext_id = mdata.id;
-			Object.defineProperty(m_object, 'script', {
-				enumerable: true,
-				get: function() {
-					return XKit.installed.script(ext_id);
-				}
-			});
-			Object.defineProperty(m_object, 'icon', {
-				enumerable: true,
-				get: function() {
-					return XKit.installed.icon(ext_id);
-				}
-			});
-			Object.defineProperty(m_object, 'css', {
-				enumerable: true,
-				get: function() {
-					return XKit.installed.css(ext_id);
-				}
-			});
-			callback(m_object);
-		} else {
-			// Something awful has happened.
-			m_result.storage_error = true;
-			return m_result;
-		}
-
-	} catch (e) {
-
-		show_error_script("install_extension failed: " + e.message);
-		console.error("install_extension failed: " + e.message);
-
-	}
-
-}
-
 function xkit_install() {
 
 	XKit.window.show("Welcome to New XKit " + framework_version + "!", "<b>Please wait while I initialize the setup. This might take a while.<br/>Please do not navigate away from this page.</b>", "info");
 	console.log("Trying to retrieve XKit Installer.");
 
-	XKit.install("xkit_installer", function(mdata) {
+	XKit.install("xkit_installer", async function(mdata) {
 		if (mdata.errors) {
 			if (mdata.storage_error === true) {
 				show_error_installation("[Code: 401] Storage error: " + mdata.error);
@@ -4506,7 +4363,7 @@ function xkit_install() {
 		}
 
 		try {
-			new Function(mdata.script + "\n//# sourceURL=xkit/xkit_installer.js")();
+			await mdata.import();
 			XKit.extensions.xkit_installer.run();
 		} catch (e) {
 			show_error_installation("[Code: 102] " + e.message);
@@ -4604,11 +4461,11 @@ async function getExtensionData(id) {
  * {boolean} [slow]      - Value of the optional SLOW field in `script`
  */
 const extensionAttributes = [
-	{name: "title", default: null, required: true},
-	{name: "description", default: null, required: true},
-	{name: "developer", default: null, required: true},
-	{name: "version", default: null, required: true},
-	{name: "details", default: null, required: false},
+	{name: "title", default: '', required: true},
+	{name: "description", default: '', required: true},
+	{name: "developer", default: '', required: true},
+	{name: "version", default: '', required: true},
+	{name: "details", default: '', required: false},
 	{name: "frame", default: "false", required: false},
 	{name: "beta", default: "false", required: false},
 	{name: "slow", default: "false", required: false},
@@ -4621,30 +4478,23 @@ async function loadExtensionData(id) {
 	const extension = {
 		id,
 		script: contents,
+		import: () => import(browser.runtime.getURL(`/Extensions/${id}.js`)),
 		file: "found",
 		server: "up",
 		errors: false,
+		icon: await loadFile(`/Extensions/${id}.icon.js`).catch(() => ''),
+		css: await loadFile(`/Extensions/${id}.css`).catch(() => ''),
 	};
-
-	if (index[id].icon) {
-		try {
-			extension.icon = await loadFile(`/Extensions/${id}.icon.js`);
-		} catch (e) {}
-	}
-	if (index[id].css) {
-		try {
-			extension.css = await loadFile(`/Extensions/${id}.css`);
-		} catch (e) {}
-	}
 
 	extensionAttributes.forEach(({name: key, default: defaultValue}) => {
 		const match = contents.match(new RegExp("/\\*\\s*" + key.toUpperCase() + "\\s*(.+?)\\s*\\*\\*?/"));
-		if (match) {
-			extension[key] = match[1];
-		} else if (defaultValue) {
-			extension[key] = defaultValue;
-		}
+		extension[key] = match ? match[1] : defaultValue;
 	});
+
+	extension.title = extension.title || id;
+	extension.frame = extension.frame && extension.frame.includes("true") ? true : false;
+	extension.beta = extension.beta && extension.beta.includes("true") ? true : false;
+	extension.slow = extension.slow && extension.slow.includes("true") ? true : false;
 
 	return extension;
 }
