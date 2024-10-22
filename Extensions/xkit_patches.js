@@ -10,10 +10,8 @@ XKit.extensions.xkit_patches = new Object({
 	run: function() {
 		this.running = true;
 
-		this.run_order.filter(x => {
-			return this.run_order.indexOf(x) >= this.run_order.indexOf(XKit.version);
-		}).forEach(x => {
-			this.patches[x]();
+		this.patches.forEach(patch => {
+			patch();
 		});
 
 		if (XKit.browser().firefox === true && XKit.storage.get("xkit_patches", "w_edition_warned") !== "true") {
@@ -102,10 +100,8 @@ XKit.extensions.xkit_patches = new Object({
 		}, 1000);
 	},
 
-	run_order: ["7.8.1", "7.8.2", "7.9.0", "7.9.1", "7.9.2", "7.10.0"],
-
-	patches: {
-		"7.10.0": function() {
+	patches: [
+		function() {
 
 			/**
 			 * Given a list of different collections in `items`, return all
@@ -1107,7 +1103,7 @@ XKit.extensions.xkit_patches = new Object({
 				XKit.tools.add_css(`${selector} {height: 0; margin: 0; overflow: hidden;}`, extension);
 			};
 		},
-	},
+	],
 
 	destroy: function() {
 		// console.log = XKit.log_back;
