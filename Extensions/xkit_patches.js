@@ -10,19 +10,18 @@ XKit.extensions.xkit_patches = new Object({
 	run: function() {
 		this.running = true;
 
-		this.run_order.filter(x => {
-			return this.run_order.indexOf(x) >= this.run_order.indexOf(XKit.version);
-		}).forEach(x => {
-			this.patches[x]();
+		this.patches.forEach(patch => {
+			patch();
 		});
 
 		if (XKit.browser().firefox === true && XKit.storage.get("xkit_patches", "w_edition_warned") !== "true") {
 			let version = XKit.tools.parse_version(XKit.version);
 			if (version.major === 7 && version.minor >= 8) {
-				fetch(browser.extension.getURL("manifest.json")) // eslint-disable-line no-undef
+				fetch(browser.runtime.getURL("manifest.json")) // eslint-disable-line no-undef
 					.then(response => response.json())
 					.then(responseData => {
-						if (responseData.applications.gecko.id === "@new-xkit-w") {
+						if (responseData.applications && responseData.applications.gecko.id === "@new-xkit-w" ||
+							responseData.browser_specific_settings && responseData.browser_specific_settings.gecko.id === "@new-xkit-w") {
 							XKit.window.show(
 								"W Edition warning",
 								"XKit Patches has determined that you are using <br><b>New XKit (W Edition)</b>, an unofficial upload of New XKit.<br><br>" +
@@ -83,90 +82,12 @@ XKit.extensions.xkit_patches = new Object({
 
 		window.addEventListener("message", XKit.blog_listener.eventHandler);
 
-		// Scrape Tumblr's data object now that we can run add_function
-		const blog_scraper = XKit.page.react ?
-			function() {
-				/* globals tumblr */
-				let blogs = [];
-				Promise.race([
-					new Promise((resolve) => setTimeout(resolve, 30000)),
-					(async () => {
-						const {response} = await tumblr.apiFetch("/v2/user/info", {
-							queryParams: {'fields[blogs]': 'name'},
-						});
-						blogs = response.user.blogs.map(blog => blog.name);
-					})()
-				]).finally(() => {
-					window.postMessage({
-						xkit_blogs: blogs
-					}, window.location.protocol + "//" + window.location.host);
-				});
-			} :
-			function() {
-				var blogs = [];
-				try {
-					var models = Tumblr.dashboardControls.allTumblelogs;
-					models.filter(function(model) {
-						return model.attributes.hasOwnProperty("is_current");
-					}).forEach(function(model) {
-						blogs.push(model.attributes.name);
-					});
-				} catch (e) {} finally {
-					window.postMessage({
-						xkit_blogs: blogs
-					}, window.location.protocol + "//" + window.location.host);
-				}
-			};
-		XKit.tools.add_function(blog_scraper, true);
-
-		XKit.tools.add_function(function fix_autoplaying_yanked_videos() {
-
-			if (!window._ || !window.jQuery) {
-				return;
-			}
-
-			if (_.get(window, "Tumblr.Prima.CrtPlayer")) {
-				window.Tumblr.Prima.CrtPlayer.prototype.onLoadedMetadata =
-				_.wrap(window.Tumblr.Prima.CrtPlayer.prototype.onLoadedMetadata,
-					function(wrapped, _event) {
-						if (!this.$el.is(":visible") || !jQuery.contains(document, this.$el[0])) {
-							if (!this.$el.find('video[src^="blob:"]').length) {
-								return true;
-							}
-						}
-						return wrapped.call(this, _event);
-					});
-			}
-
-			// unfortunately we're not fast enought to catch some
-			// CRT instances that are currently instantiated, so handle those differently
-			jQuery('video').parent().each(function() {
-				this.addEventListener('loadedmetadata', function(event) {
-					var $target = jQuery(event.target);
-					if (!$target.is(":visible") || !jQuery.contains(document, event.target)) {
-						event.stopPropagation();
-					}
-				}, true); // uses .parent() and capturing to preempt tumblr's js
-			});
-		}, true, {});
-
-		XKit.tools.add_function(function fix_jk_scrolling() {
-			if (!window._ || !window.jQuery) {
-				return;
-			}
-
-			if (_.get(window, "Tumblr.KeyCommands.update_post_positions")) {
-				Tumblr.KeyCommands.update_post_positions = _.wrap(Tumblr.KeyCommands.update_post_positions,
-					function(wrapped, _event) {
-						wrapped.call(this);
-						this.post_positions = _.pick(this.post_positions,
-							function(scroll_pos, element_id) {
-								var element = jQuery("[data-pageable='" + element_id + "']");
-								return element.is(":visible") && element.height() > 0;
-							});
-					});
-			}
-		}, true, {});
+		// Scrape Tumblr's data object
+		XKit.tools.inject(
+			XKit.page.react
+				? "/main_world/blog_scraper_react.js"
+				: "/main_world/blog_scraper.js"
+		);
 
 		setTimeout(function() {
 
@@ -179,10 +100,8 @@ XKit.extensions.xkit_patches = new Object({
 		}, 1000);
 	},
 
-	run_order: ["7.8.1", "7.8.2", "7.9.0", "7.9.1", "7.9.2", "7.10.0"],
-
-	patches: {
-		"7.10.0": function() {
+	patches: [
+		function() {
 
 			/**
 			 * Given a list of different collections in `items`, return all
@@ -290,46 +209,11 @@ XKit.extensions.xkit_patches = new Object({
 			};
 
 			/**
-			 * Removes the leading whitespace that occurrs on every line of
-			 * `string`, and replaces it with the string passed in as `level`.
-			 * This is often helpful for making the output of template strings
-			 * more readable, by normalizing the additional indentation that
-			 * comes with their position in a source file.
-			 *
-			 * @param {String} level - the amount of indentation to add to
-			 *     every line, as a string. May be '' for no indentation.
-			 * @param {String} string - the input string to remove and/or add
-			 *     indentation from/to.
-			 * @returns {String} - the normalized string
-			 */
-			XKit.tools.normalize_indentation = (level, string) => {
-				const lines = string.split("\n");
-				const indentation_level = _.minBy(
-					lines.map(line => line.match(/^[ \t]+/)),
-					i => i ? i[0].length : Infinity
-				) || '';
-
-				const leading_indentation = new RegExp(`^${indentation_level}`);
-				return lines.map(line => line.replace(leading_indentation, level)).join("\n");
-			};
-
-			/**
 			 * Gets redpop translation strings for selecting elements via aria labels
 			 * @param {String} key - en_US string to translate
 			 * @return {Promise} - resolves with the translated key
 			 */
 			XKit.interface.translate = key => new Promise(resolve => {
-				function grabLanguageData() {
-					const waitForTumblrObject = setInterval(() => {
-						if (window.tumblr) {
-							clearInterval(waitForTumblrObject);
-							window.postMessage({
-								languageData: window.tumblr.languageData
-							}, `${location.protocol}//${location.host}`);
-						}
-					}, 100);
-				}
-
 				function receiveLanguageData(e) {
 					if (e.origin === `${location.protocol}//${location.host}` && e.data.languageData !== undefined) {
 						window.removeEventListener("message", receiveLanguageData);
@@ -350,7 +234,7 @@ XKit.extensions.xkit_patches = new Object({
 					resolve(XKit.interface.translations[key]);
 				} else {
 					window.addEventListener("message", receiveLanguageData);
-					XKit.tools.add_function(grabLanguageData, true);
+					XKit.tools.inject("/main_world/grab_language_data.js");
 				}
 			});
 
@@ -380,7 +264,7 @@ XKit.extensions.xkit_patches = new Object({
 					script.textContent = "var add_tag = " + JSON.stringify(addt) + ";\n";
 					script.textContent = script.textContent +
 						(exec ? "(" : "") +
-						XKit.tools.normalize_indentation('', func.toString()) +
+						func.toString() +
 						(exec ? ")();" : "");
 					if (XKit.tools.add_function_nonce) {
 						script.setAttribute('nonce', XKit.tools.add_function_nonce);
@@ -425,7 +309,7 @@ XKit.extensions.xkit_patches = new Object({
 
 					const add_func = `(async ({callback_nonce, args}) => {
 						try {
-							const return_value = await (${XKit.tools.normalize_indentation("\t".repeat(7), func.toString())})(args);
+							const return_value = await (${func.toString()})(args);
 
 							window.postMessage({
 								xkit_callback_nonce: callback_nonce,
@@ -688,14 +572,7 @@ XKit.extensions.xkit_patches = new Object({
 						return this.cssMap;
 					}
 
-					this.cssMap = await XKit.tools.async_add_function(async () => {
-						if (!window.tumblr) {
-							return null;
-						}
-						const cssMap = await window.tumblr.getCssMap();
-						return cssMap;
-					});
-					return this.cssMap;
+					this.cssMap = await XKit.tools.inject("/main_world/css_map.js");
 				},
 
 				keyToClasses: function(key) {
@@ -731,7 +608,6 @@ XKit.extensions.xkit_patches = new Object({
 					).map(selectors => selectors.join(' ')).join(',');
 				},
 			};
-			_.bindAll(XKit.css_map, ['getCssMap', 'keyToClasses', 'keyToCss', 'descendantSelector']);
 
 			// eslint-disable-next-line no-async-promise-executor
 			XKit.tools.Nx_XHR = details => new Promise(async (resolve, reject) => {
@@ -753,47 +629,6 @@ XKit.extensions.xkit_patches = new Object({
 						if (!existing.includes(x.toLowerCase())) {
 							details.headers[x] = standard_headers[x];
 						}
-					}
-				}
-
-				function send() {
-					var request = add_tag;
-					var xhr = new XMLHttpRequest();
-					xhr.open(request.method, request.url, request.async || true);
-
-					if (request.json === true) {
-						xhr.setRequestHeader("Content-type", "application/json");
-					}
-					for (var header in request.headers) {
-						xhr.setRequestHeader(header, request.headers[header]);
-					}
-
-					function callback(result) {
-						var bare_headers = xhr.getAllResponseHeaders().split("\r\n");
-						var cur_headers = {}, splitter;
-						for (var x in bare_headers) {
-							splitter = bare_headers[x].indexOf(":");
-							if (splitter === -1) { continue; }
-							cur_headers[bare_headers[x].substring(0, splitter).trim().toLowerCase()] = bare_headers[x].substring(splitter + 1).trim();
-						}
-						window.postMessage({
-							response: {
-								status: xhr.status,
-								responseText: xhr.response,
-								headers: cur_headers
-							},
-							timestamp: "xkit_" + request.timestamp,
-							success: result
-						}, window.location.protocol + "//" + window.location.host);
-					}
-
-					xhr.onerror = function() { callback(false); };
-					xhr.onload = function() { callback(true); };
-
-					if (typeof request.data !== "undefined") {
-						xhr.send(request.data);
-					} else {
-						xhr.send();
 					}
 				}
 
@@ -819,7 +654,7 @@ XKit.extensions.xkit_patches = new Object({
 				}
 
 				window.addEventListener("message", receive);
-				XKit.tools.add_function(send, true, details);
+				XKit.tools.inject("/main_world/Nx_XHR_send.js", [details]);
 
 			});
 
@@ -888,18 +723,7 @@ XKit.extensions.xkit_patches = new Object({
 
 			XKit.interface.react = {
 				post_props: async function(post_id) {
-					// eslint-disable-next-line no-shadow
-					return XKit.tools.async_add_function(({post_id}) => {
-						const keyStartsWith = (obj, prefix) =>
-							Object.keys(obj).find(key => key.startsWith(prefix));
-						const element = document.querySelector(`[data-id="${post_id}"]`);
-						let fiber = element[keyStartsWith(element, '__reactFiber')];
-
-						while (fiber.memoizedProps.timelineObject === undefined) {
-							fiber = fiber.return;
-						}
-						return fiber.memoizedProps.timelineObject;
-					}, {post_id});
+					return XKit.tools.inject("/main_world/post_props.js", [post_id]);
 				},
 
 				post: async function($element) {
@@ -1176,6 +1000,10 @@ XKit.extensions.xkit_patches = new Object({
 				destroy_collapsed: function(id) {
 					$(`.${id}-collapsed`).removeClass(`${id}-collapsed`);
 					$(`.${id}-collapsed-note`).remove();
+				},
+
+				api_fetch: async function(resource, init) {
+					return XKit.tools.inject("/main_world/api_fetch.js", [{ resource, init, headerVersion: XKit.version }]);
 				}
 			};
 
@@ -1275,7 +1103,7 @@ XKit.extensions.xkit_patches = new Object({
 				XKit.tools.add_css(`${selector} {height: 0; margin: 0; overflow: hidden;}`, extension);
 			};
 		},
-	},
+	],
 
 	destroy: function() {
 		// console.log = XKit.log_back;

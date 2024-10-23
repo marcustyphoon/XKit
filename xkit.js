@@ -47,7 +47,9 @@ var xkit_global_start = Date.now();  // log start timestamp
 			}
 
 		},
-		init_normal: function() {
+		init_normal: async function() {
+			await init_main_world();
+			await XKit.installed.init_data();
 
 			try {
 
@@ -98,18 +100,12 @@ var xkit_global_start = Date.now();  // log start timestamp
 					return;
 				}
 
-				// Before we run main--if patches is a broken version,
-				// we need to force an update.
-				if (XKit.installed.version('xkit_patches') === '7.2.8') {
-					XKit.special.force_update();
-				}
-
 				// It exists! Great.
 				var xkit_main = XKit.installed.get("xkit_main");
-				if (!xkit_main.errors && xkit_main.script) {
+				if (!xkit_main.errors) {
 					console.log("Trying to run xkit_main.");
 					try {
-						new Function(xkit_main.script + "\n//# sourceURL=xkit/xkit_main.js")();
+						await xkit_main.import();
 						XKit.extensions.xkit_main.run();
 					} catch (e) {
 						show_error_reset("Can't run xkit_main: " + e.message);
@@ -121,12 +117,6 @@ var xkit_global_start = Date.now();  // log start timestamp
 						xkit_install();
 						return;
 					}
-					if (xkit_main.error == "parse_error") {
-						// Corrupt storage? Recomment reset.
-						console.error("xkit_main is corrupt!");
-						show_error_reset("Package xkit_main is corrupted!");
-						return;
-					}
 				}
 
 			} catch (e) {
@@ -134,7 +124,9 @@ var xkit_global_start = Date.now();  // log start timestamp
 				show_error_update("xkit_init(): " + e.message);
 			}
 		},
-		init_frame: function() {
+		init_frame: async function() {
+			await init_main_world();
+			await XKit.installed.init_data();
 
 			// Load frame extensions.
 			// First lets check if it actually exists.
@@ -145,10 +137,10 @@ var xkit_global_start = Date.now();  // log start timestamp
 
 			// It exists! Great.
 			var xkit_main = XKit.installed.get("xkit_main");
-			if (!xkit_main.errors && xkit_main.script) {
+			if (!xkit_main.errors) {
 				console.log("Trying to run xkit_main.");
 				try {
-					new Function(xkit_main.script + "\n//# sourceURL=xkit/xkit_main.js")();
+					await xkit_main.import();
 					XKit.frame_mode = true;
 					XKit.extensions.xkit_main.run();
 				} catch (e) {
@@ -216,14 +208,7 @@ var xkit_global_start = Date.now();  // log start timestamp
 					}
 				});
 			},
-			extension: function(extension_id, callback) {
-				getExtensionData(extension_id).then(callback);
-			},
 			page: function(page, callback) {
-				if (page === 'list.php') {
-					getListData().then(callback);
-					return;
-				}
 				if (page === 'gallery.php') {
 					getGalleryData().then(callback);
 					return;
@@ -244,13 +229,22 @@ var xkit_global_start = Date.now();  // log start timestamp
 		},
 		install: function(extension_id, callback) {
 			// Installs the extension.
-			XKit.download.extension(extension_id, function(mdata) {
+			getExtensionData(extension_id).then((data) => {
 				console.log("download.extension of '" + extension_id + "' was successful. Calling callback.");
-				install_extension(mdata, callback);
+				XKit.installed.add(extension_id, data);
+				callback(data);
 			});
 		},
 		installed: {
-			add: function(extension_id) {
+			data: {},
+			init_data: () => Promise.all(
+				XKit.installed.list().map(async extension_id => {
+					XKit.installed.data[extension_id] = await getExtensionData(extension_id);
+				})
+			),
+			add: function(extension_id, data) {
+				XKit.installed.data[extension_id] = data;
+
 				// Add extension to the installed list.
 				if (XKit.installed.check(extension_id) === true) {
 					// Already added, stop.
@@ -333,30 +327,10 @@ var xkit_global_start = Date.now();  // log start timestamp
 				setTimeout(check, 0);
 			},
 			get: function(extension_id) {
-				// Returns the object.
-				var app_data = XKit.tools.get_setting("extension_" + extension_id, "");
-				if (app_data === "") {
-					return {
-						errors: true,
-						error: "not_installed"
-					};
-				}
-				try {
-					var m_object = JSON.parse(app_data);
-					m_object.errors = false;
-					return m_object;
-				} catch (e) {
-					return {
-						errors: true,
-						error: "parse_error"
-					};
-				}
-			},
-			update: function(extension_id, new_object) {
-				XKit.tools.set_setting("extension_" + extension_id, JSON.stringify(new_object));
-				if (XKit.installed.check(extension_id) === false) {
-					XKit.installed.add(extension_id);
-				}
+				return XKit.installed.data[extension_id] || {
+					errors: true,
+					error: "not_installed"
+				};
 			},
 			enable: function(extension_id) {
 				XKit.tools.set_setting("extension__" + extension_id + "__enabled", "true");
@@ -1317,45 +1291,7 @@ var xkit_global_start = Date.now();  // log start timestamp
 			Nx_XHR: function(details) {
 				details.timestamp = new Date().getTime() + Math.random();
 
-				XKit.tools.add_function(function() {
-					var xhr = new XMLHttpRequest();
-					xhr.open(add_tag.method, add_tag.url, add_tag.async || true);
-
-					if (add_tag.json === true) {
-						xhr.setRequestHeader("Content-type", "application/json");
-					}
-					for (var header in add_tag.headers) {
-						xhr.setRequestHeader(header, add_tag.headers[header]);
-					}
-
-					function callback(result) {
-						var bare_headers = xhr.getAllResponseHeaders().split("\r\n");
-						var cur_headers = {}, splitter;
-						for (var x in bare_headers) {
-							splitter = bare_headers[x].indexOf(":");
-							if (splitter === -1) { continue; }
-							cur_headers[bare_headers[x].substring(0, splitter).trim().toLowerCase()] = bare_headers[x].substring(splitter + 1).trim();
-						}
-						window.postMessage({
-							response: {
-								status: xhr.status,
-								responseText: xhr.response,
-								headers: cur_headers
-							},
-							timestamp: "xkit_" + add_tag.timestamp,
-							success: result
-						}, window.location.protocol + "//" + window.location.host);
-					}
-
-					xhr.onerror = function() { callback(false); };
-					xhr.onload = function() { callback(true); };
-
-					if (typeof add_tag.data !== "undefined") {
-						xhr.send(add_tag.data);
-					} else {
-						xhr.send();
-					}
-				}, true, details);
+				XKit.tools.inject("/main_world/Nx_XHR_send.js", [details]);
 
 				function handler(e) {
 					if (e.origin === window.location.protocol + "//" + window.location.host && e.data.timestamp === "xkit_" + details.timestamp) {
@@ -1604,7 +1540,36 @@ var xkit_global_start = Date.now();  // log start timestamp
 						true
 					);
 				});
-			}
+			},
+
+			/**
+			 * Copies a function from the addon context into the page context
+			 * and returns the result of the function as a promise.
+			 *
+			 * See the main_world directory and [../main_world/index.js](../main_world/index.js).
+			 * @param {string} path - Absolute path of script to inject (will be fed to `runtime.getURL()`)
+			 * @param {Array} [args] - Array of arguments to pass to the script
+			 * @param {Element} [target] - Target element; will be accessible as the `this` value in the injected function.
+			 * @returns {Promise<any>} The transmitted result of the script
+			 */
+			inject: (path, args = [], target = document.documentElement) =>
+				new Promise((resolve, reject) => {
+					const requestId = String(Math.random());
+					const data = {path: browser.runtime.getURL(path), args, id: requestId};
+
+					const responseHandler = ({detail}) => {
+						const {id, result, exception} = JSON.parse(detail);
+						if (id !== requestId) return;
+
+						target.removeEventListener("newxkitinjectionresponse", responseHandler);
+						exception ? reject(exception) : resolve(result);
+					};
+					target.addEventListener("newxkitinjectionresponse", responseHandler);
+
+					target.dispatchEvent(
+						new CustomEvent("newxkitinjectionrequest", {detail: JSON.stringify(data), bubbles: true})
+					);
+				}),
 		},
 		interface: {
 			revision: 2,
@@ -3207,33 +3172,6 @@ var xkit_global_start = Date.now();  // log start timestamp
 		},
 		special: {
 
-			force_update: function() {
-				XKit.install("xkit_updates", data => {
-					if (data.errors) {
-						if (data.storage_error === true) {
-							show_error_installation("[Code: 401] Storage error: " + data.error);
-						} else {
-							if (data.server_down === true) {
-								show_error_installation("[Code: 101] Can't reach New XKit servers");
-							} else {
-								show_error_installation("[Code: 100] Server returned error/empty script");
-							}
-						}
-						return;
-					}
-
-					try {
-						new Function(data.script + "\n//# sourceURL=xkit/xkit_updates.js")();
-						XKit.window.show("Forcing Extension Updates",
-							"Please do not navigate away from this page. Your extensions are being updated for compatibility with the latest XKit version." +
-							'<div id="xkit-forced-auto-updates-message">Initializing...</div>', "info");
-						XKit.extensions.xkit_updates.get_list(true);
-					} catch (e) {
-						show_error_installation("[Code: 102] " + e.message);
-					}
-				});
-			},
-
 			reset: function() {
 
 				XKit.window.show("Reset XKit", "Really delete all the data stored in XKit?<br/>Your settings will be lost. You can not undo this action.", "question", "<div id=\"reset-xkit-yes\" class=\"xkit-button default\">Yes, reset XKit</div><div id=\"reset-xkit-no\" class=\"xkit-button\">Cancel</div>");
@@ -3328,7 +3266,7 @@ function show_message(title, msg, icon, buttons) {
 	});
 }
 
-function xkit_init_special() {
+async function xkit_init_special() {
 
 	$("body").html("");
 	document.title = "XKit";
@@ -3354,11 +3292,9 @@ function xkit_init_special() {
 
 	if (document.location.href.indexOf("/xkit_editor") !== -1) {
 		if (typeof(browser) !== 'undefined') {
-			var xhr = new XMLHttpRequest();
-			xhr.open('GET', browser.extension.getURL('editor.js'), false);
-			xhr.send(null);
 			try {
-				new Function(xhr.responseText + "\n//# sourceURL=xkit/editor.js")();
+				await XKit.installed.init_data();
+				await import(browser.runtime.getURL("/editor.js"));
 				XKit.extensions.xkit_editor.run();
 			} catch (e) {
 				XKit.window.show("Can't launch XKit Editor", "<p>" + e.message + "</p>", "error", "<div id=\"xkit-close-message\" class=\"xkit-button default\">OK</div>");
@@ -3408,138 +3344,12 @@ function xkit_check_storage() {
 
 }
 
-function install_extension(mdata, callback) {
-
-	try {
-
-		if (mdata.errors || !mdata.script) {
-			// Server returned an error or empty script.
-			console.warn("install_extension failed: Empty script or errors.");
-			return callback(mdata);
-		}
-
-		var m_object = {
-			script: mdata.script,
-			id: mdata.id
-		};
-
-		if (typeof mdata.icon !== "undefined") {
-			m_object.icon = mdata.icon;
-		} else {
-			m_object.icon = "";
-		}
-
-		if (typeof mdata.css !== "undefined") {
-			m_object.css = mdata.css;
-		} else {
-			m_object.css = "";
-		}
-
-		if (typeof mdata.title !== "undefined") {
-			m_object.title = mdata.title;
-		} else {
-			m_object.title = mdata.id;
-		}
-
-		if (typeof mdata.description !== "undefined") {
-			m_object.description = mdata.description;
-		} else {
-			m_object.description = "";
-		}
-
-		if (typeof mdata.developer !== "undefined") {
-			m_object.developer = mdata.developer;
-		} else {
-			m_object.developer = "";
-		}
-
-		if (typeof mdata.version !== "undefined") {
-			m_object.version = mdata.version;
-		} else {
-			m_object.version = "";
-		}
-
-		if (typeof mdata.frame !== "undefined") {
-			if (mdata.frame === "true" || mdata.frame === " true") {
-				m_object.frame = true;
-			} else {
-				m_object.frame = false;
-			}
-		} else {
-			m_object.frame = false;
-		}
-
-		if (typeof mdata.beta !== "undefined") {
-			if (mdata.beta === "true" || mdata.beta === " true") {
-				m_object.beta = true;
-			} else {
-				m_object.beta = false;
-			}
-		} else {
-			m_object.beta = false;
-		}
-
-		if (typeof mdata.slow !== "undefined") {
-			if (mdata.slow === "true" || mdata.slow === " true") {
-				m_object.slow = true;
-			} else {
-				m_object.slow = false;
-			}
-		} else {
-			m_object.slow = false;
-		}
-
-		if (typeof mdata.details !== "undefined") {
-			m_object.details = mdata.details;
-		} else {
-			m_object.details = "";
-		}
-
-		var m_result = XKit.tools.set_setting("extension_" + mdata.id, JSON.stringify(m_object));
-		if (m_result.errors === false) {
-			// Saved data without any errors!
-			XKit.installed.add(mdata.id);
-			var ext_id = mdata.id;
-			Object.defineProperty(m_object, 'script', {
-				enumerable: true,
-				get: function() {
-					return XKit.installed.script(ext_id);
-				}
-			});
-			Object.defineProperty(m_object, 'icon', {
-				enumerable: true,
-				get: function() {
-					return XKit.installed.icon(ext_id);
-				}
-			});
-			Object.defineProperty(m_object, 'css', {
-				enumerable: true,
-				get: function() {
-					return XKit.installed.css(ext_id);
-				}
-			});
-			callback(m_object);
-		} else {
-			// Something awful has happened.
-			m_result.storage_error = true;
-			return m_result;
-		}
-
-	} catch (e) {
-
-		show_error_script("install_extension failed: " + e.message);
-		console.error("install_extension failed: " + e.message);
-
-	}
-
-}
-
 function xkit_install() {
 
 	XKit.window.show("Welcome to New XKit " + framework_version + "!", "<b>Please wait while I initialize the setup. This might take a while.<br/>Please do not navigate away from this page.</b>", "info");
 	console.log("Trying to retrieve XKit Installer.");
 
-	XKit.install("xkit_installer", function(mdata) {
+	XKit.install("xkit_installer", async function(mdata) {
 		if (mdata.errors) {
 			if (mdata.storage_error === true) {
 				show_error_installation("[Code: 401] Storage error: " + mdata.error);
@@ -3554,7 +3364,7 @@ function xkit_install() {
 		}
 
 		try {
-			new Function(mdata.script + "\n//# sourceURL=xkit/xkit_installer.js")();
+			await mdata.import();
 			XKit.extensions.xkit_installer.run();
 		} catch (e) {
 			show_error_installation("[Code: 102] " + e.message);
@@ -3597,16 +3407,30 @@ function show_error_reset(message) {
 		"error",
 
 		'<div id="xkit-close-message" class="xkit-button">OK</div>' +
-		'<div id="xkit-force-update" class="xkit-button default">Update Extensions</div>' +
 		'<a href="https://new-xkit-support.tumblr.com" class="xkit-button">New XKit Support</a>'
 	);
-	$("#xkit-force-update").click(XKit.special.force_update);
 }
 
 function show_error_update(message) {
 	// Shortcut to call when there is a javascript error.
 	XKit.window.show("XKit ran into an error.", "<b>Generated Error message:</b><br/><p>" + message + "</p>You might need to update XKit manually. Please visit the New XKit Blog. Alternatively, you can write down the error message above and contact New XKit Support to see how you can fix this or reload the page to try again.", "error", "<div id=\"xkit-close-message\" class=\"xkit-button default\">OK</div><a href=\"https://new-xkit-extension.tumblr.com\" class=\"xkit-button\">New XKit Blog</a><a href=\"https://new-xkit-support.tumblr.com\" class=\"xkit-button\">New XKit Support</a>");
 }
+
+const init_main_world = () =>
+	new Promise(resolve => {
+		document.documentElement.addEventListener("newxkitinjectionready", resolve, {once: true});
+
+		const scriptWithNonce = [...document.scripts].find(script => script.getAttributeNames().includes("nonce"));
+
+		if (scriptWithNonce) {
+			const {nonce} = scriptWithNonce;
+			const script = document.createElement("script");
+			script.nonce = nonce;
+			script.src = browser.runtime.getURL("/main_world/index.js");
+			document.documentElement.append(script);
+		}
+	});
+
 
 /**
  * Functions used in place of gulp build server
@@ -3638,11 +3462,11 @@ async function getExtensionData(id) {
  * {boolean} [slow]      - Value of the optional SLOW field in `script`
  */
 const extensionAttributes = [
-	{name: "title", default: null, required: true},
-	{name: "description", default: null, required: true},
-	{name: "developer", default: null, required: true},
-	{name: "version", default: null, required: true},
-	{name: "details", default: null, required: false},
+	{name: "title", default: '', required: true},
+	{name: "description", default: '', required: true},
+	{name: "developer", default: '', required: true},
+	{name: "version", default: '', required: true},
+	{name: "details", default: '', required: false},
 	{name: "frame", default: "false", required: false},
 	{name: "beta", default: "false", required: false},
 	{name: "slow", default: "false", required: false},
@@ -3654,28 +3478,23 @@ async function loadExtensionData(id) {
 	const extension = {
 		id,
 		script: contents,
+		import: () => import(browser.runtime.getURL(`/Extensions/${id}.js`)),
 		file: "found",
 		server: "up",
 		errors: false,
+		icon: await loadFile(`/Extensions/${id}.icon.js`).catch(() => ''),
+		css: await loadFile(`/Extensions/${id}.css`).catch(() => ''),
 	};
-
-	try {
-		const icon = await loadFile(`/Extensions/${id}.icon.js`);
-		extension.icon = icon;
-	} catch (e) {}
-	try {
-		const css = await loadFile(`/Extensions/${id}.css`);
-		extension.css = css;
-	} catch (e) {}
 
 	extensionAttributes.forEach(({name: key, default: defaultValue}) => {
 		const match = contents.match(new RegExp("/\\*\\s*" + key.toUpperCase() + "\\s*(.+?)\\s*\\*\\*?/"));
-		if (match) {
-			extension[key] = match[1];
-		} else if (defaultValue) {
-			extension[key] = defaultValue;
-		}
+		extension[key] = match ? match[1] : defaultValue;
 	});
+
+	extension.title = extension.title || id;
+	extension.frame = extension.frame && extension.frame.includes("true") ? true : false;
+	extension.beta = extension.beta && extension.beta.includes("true") ? true : false;
+	extension.slow = extension.slow && extension.slow.includes("true") ? true : false;
 
 	return extension;
 }
@@ -3697,16 +3516,6 @@ async function getGalleryData() {
 			icon,
 			details,
 		})),
-	};
-}
-
-async function getListData() {
-	const list = JSON.parse(await loadFile("/Extensions/_index.json"));
-	const extensionData = await Promise.all(list.map(getExtensionData));
-
-	return {
-		server: "up",
-		extensions: extensionData.map(({id, version}) => ({name: id, version})),
 	};
 }
 

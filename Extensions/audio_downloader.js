@@ -19,10 +19,7 @@ XKit.extensions.audio_downloader = new Object({
 	run: function() {
 
 		if (XKit.page.react) {
-			XKit.tools.async_add_function(async () => {
-				/* globals tumblr */
-				return await tumblr.getCssMap();
-			})
+			XKit.css_map.getCssMap()
 			.then(({audioBlock}) => {
 				this.audioBlockClass = `.${audioBlock[0]}`;
 				this.react_add_buttons();

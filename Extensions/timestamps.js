@@ -339,11 +339,7 @@ XKit.extensions.timestamps = new Object({
 					return;
 				}
 
-				XKit.tools.async_add_function(async ({uuid, id}) => { // eslint-disable-line no-shadow
-					/* globals tumblr */
-					const {response: {timestamp}} = await tumblr.apiFetch(`/v2/blog/${uuid}/posts/${id}`);
-					return timestamp;
-				}, {uuid, id}).then(timestamp => {
+				XKit.interface.react.api_fetch(`/v2/blog/${uuid}/posts/${id}`).then(({response: {timestamp}}) => timestamp).then(timestamp => {
 					$xtimestamp
 					.removeClass("xtimestamp-loading")
 					.html(XKit.extensions.timestamps.format_date(timestamp));

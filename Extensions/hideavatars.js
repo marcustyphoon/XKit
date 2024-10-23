@@ -22,10 +22,7 @@ XKit.extensions.hideavatars = new Object({
 		XKit.extensions.hideavatars.load_blogs();
 
 		if (XKit.page.react) {
-			XKit.tools.async_add_function(async () => {
-				/* globals tumblr */
-				return await tumblr.getCssMap();
-			})
+			XKit.css_map.getCssMap()
 			.then(({stickyContainer, reblogHeader}) => {
 				const sticky_top_selector = `.xkit--react .${stickyContainer[0]}`;
 				const sticky_selector = this.blognames.map(x => `${sticky_top_selector} a[title="${x.title}"]::before`).join(',');
