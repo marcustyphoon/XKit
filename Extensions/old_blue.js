@@ -266,6 +266,31 @@ XKit.extensions.old_blue = new Object({
 				}
 			}
 		}
+		XKit.tools.add_css(`
+			#old_blue_non_default_palette {
+				display: none;
+
+				padding: 11px 15px;
+				border-bottom: 0;
+				font-size: 11px;
+				background: rgba(255, 136, 0, .2);
+				background: var(--xkit-extensions-settings-slow);
+				color: var(--xkit-on-primary);
+				line-height: 1.5;
+			}
+			body.xkit--react:not(.palette--trueBlue) #old_blue_non_default_palette {
+				display: block;
+			}
+		`, "old_blue");
+	},
+
+	cpanel: function(m_div) {
+		$(m_div).before(`
+			<div id="old_blue_non_default_palette">
+				Warning: non-default Tumblr palette selected. Some colors may be incorrect. To maximize compatibility,
+				select True Blue in <a href="https://www.tumblr.com/settings/dashboard">Settings > Dashboard</a>.
+			</div>
+		`);
 	},
 
 	destroy: function() {
