@@ -1,0 +1,32 @@
+name: Update released version PR
+
+on:
+  workflow_dispatch:
+    inputs:
+      newVersion:
+        description: version override
+        type: string
+        required: false
+
+jobs:
+  create-pr:
+    name: Create PR
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js environment
+        uses: actions/setup-node@v4
+        with:
+          node-version: lts/*
+
+      - name: Update versions
+        run: node dev/update_released_version.mjs ${{ inputs.newVersion || '' }}
+
+      - name: Create Pull Request
+        uses: peter-evans/create-pull-request@v7
+        with:
+          title: Update released version
+          commit-message: update released version
+          branch: update-released-version
