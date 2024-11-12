@@ -11,9 +11,11 @@
   "devDependencies": {
     "connect": "^3.7.0",
     "del": "^1.2.1",
+    "dotenv": "^16.4.5",
     "eslint": "^7.15.0",
     "gulp": "^4.0.2",
     "gulp-util": "^3.0.8",
+    "jsonwebtoken": "^9.0.2",
     "merge-stream": "^0.1.8",
     "morgan": "^1.10.0",
     "serve-static": "^1.14.1",
