@@ -1,0 +1,71 @@
+name: Sign and Release
+
+on:
+  workflow_dispatch:
+  push:
+    tags:
+      - "v*.*.*"
+
+permissions:
+  contents: write
+
+jobs:
+  test:
+    name: Sign and Release
+    runs-on: ubuntu-latest
+    continue-on-error: true
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Find latest tag
+        id: find-tag
+        run: |
+          echo tag=$(git describe --tags --abbrev=0) >> $GITHUB_OUTPUT
+          echo cleantag=$(git describe --tags --abbrev=0)/v// >> $GITHUB_OUTPUT
+
+      - name: Checkout latest tag
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ steps.find-tag.outputs.tag }}
+          fetch-depth: 0
+
+      - name: Setup Node.js environment
+        uses: actions/setup-node@v4
+        with:
+          node-version: lts/*
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Lint WebExtension
+        run: npm run lint
+
+      # - name: Firefox — Sign WebExtension
+      #   run: npm run sign
+      #   timeout-minutes: 30
+      #   env:
+      #     WEB_EXT_API_KEY: ${{ secrets.WEB_EXT_API_KEY }}
+      #     WEB_EXT_API_SECRET: ${{ secrets.WEB_EXT_API_SECRET }}
+      #     WEB_EXT_CHANNEL: unlisted
+
+      - name: "MOCK: Firefox — Sign WebExtension"
+        run: |
+          node -e "import fs from 'node:fs'; fs.mkdirSync('web-ext-artifacts', { recursive: true }); fs.writeFileSync('web-ext-artifacts/whatever-7.10.0.xpi', 'hello world');"
+
+      - name: Generate Github Release
+        uses: softprops/action-gh-release@v2
+        with:
+          name: New XKit ${{ steps.find-tag.outputs.cleantag }}
+          tag_name: ${{ steps.find-tag.outputs.tag }}
+          generate_release_notes: true
+          body: |
+            **NOTE:** Firefox may complain about getting a connection error when clicking the below XPI link. If it does, right-click the link and select "Save Link As...", then navigate to `about:addons` and drag the file onto that screen to install New XKit.
+
+            For Chrome: Install from the [Chrome Web Store](https://new-xkit-extension.tumblr.com/chrome) instead of here.
+          files: web-ext-artifacts/*.xpi
+          draft: true
+
