@@ -23,8 +23,9 @@ jobs:
       - name: Find latest tag
         id: find-tag
         run: |
-          echo tag=$(git describe --tags --abbrev=0) >> $GITHUB_OUTPUT
-          echo cleantag=$(git describe --tags --abbrev=0)/v// >> $GITHUB_OUTPUT
+          tag=$(git describe --tags --abbrev=0)
+          echo tag=$tag >> $GITHUB_OUTPUT
+          echo cleantag=${tag/v/} >> $GITHUB_OUTPUT
 
       - name: Checkout latest tag
         uses: actions/checkout@v4
