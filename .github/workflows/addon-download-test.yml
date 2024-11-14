@@ -19,8 +19,15 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      - name: Download XPI
-        run: node dev/download_xpi.mjs
-        env:
-          WEB_EXT_API_KEY: ${{ secrets.WEB_EXT_API_KEY }}
-          WEB_EXT_API_SECRET: ${{ secrets.WEB_EXT_API_SECRET }}
+      - name: Timeout Test
+        run: node -e "setTimeout(() => console.log('done'), 90 * 1000)"
+        timeout-minutes: 1
+
+      - name: After
+        run: node -e "console.log('hi')"
+
+      # - name: Download XPI
+      #   run: node dev/download_xpi.mjs
+      #   env:
+      #     WEB_EXT_API_KEY: ${{ secrets.WEB_EXT_API_KEY }}
+      #     WEB_EXT_API_SECRET: ${{ secrets.WEB_EXT_API_SECRET }}
