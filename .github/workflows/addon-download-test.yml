@@ -21,7 +21,8 @@ jobs:
         run: npm ci
 
       - name: Timeout Test
-        run: timeout 10s node -e "setTimeout(() => console.log('done'), 90 * 1000)"
+        run: node -e "setTimeout(() => console.log('done'), 90 * 1000)"
+        timeout-minutes: 1
 
       - name: After
         run: node -e "console.log('hi')"
