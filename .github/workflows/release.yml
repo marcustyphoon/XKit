@@ -37,12 +37,14 @@ jobs:
             return version;
 
       - name: Firefox — Build and Sign
-        run: npm run sign
-        timeout-minutes: 30
-        env:
-          WEB_EXT_API_KEY: ${{ secrets.WEB_EXT_API_KEY }}
-          WEB_EXT_API_SECRET: ${{ secrets.WEB_EXT_API_SECRET }}
-          WEB_EXT_CHANNEL: unlisted
+        # run: npm run sign
+        # timeout-minutes: 30
+        # env:
+        #   WEB_EXT_API_KEY: ${{ secrets.WEB_EXT_API_KEY }}
+        #   WEB_EXT_API_SECRET: ${{ secrets.WEB_EXT_API_SECRET }}
+        #   WEB_EXT_CHANNEL: unlisted
+        run: |
+          node -e "import fs from 'node:fs'; fs.mkdirSync('web-ext-artifacts', { recursive: true }); fs.writeFileSync('web-ext-artifacts/mock-${{ steps.get-version.outputs.result }}.xpi', 'hello world');"
 
       ### NOTE: This workflow may time out here while waiting for Mozilla review.
       ### If this occurs, run the "Generate Release (after signing)" action once it is complete.

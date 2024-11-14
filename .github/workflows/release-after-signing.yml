@@ -21,7 +21,9 @@ jobs:
       ### NOTE: This workflow continues the "Generate Release" workflow if it timed out.
 
       - name: Firefox — Download Latest Signed XPI
-        run: node dev/download_signed_xpi.mjs
+        # run: node dev/download_signed_xpi.mjs
+        run: |
+          node -e "import fs from 'node:fs'; fs.mkdirSync('web-ext-artifacts', { recursive: true }); fs.writeFileSync('web-ext-artifacts/mock-${{ steps.get-version.outputs.result }}.xpi', 'hello world');"
 
       - name: Get Release Version
         uses: actions/github-script@v7
