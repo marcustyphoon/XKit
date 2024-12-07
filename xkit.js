@@ -4489,8 +4489,8 @@ async function loadExtensionData(id) {
 		file: "found",
 		server: "up",
 		errors: false,
-		icon: await loadFile(`/Extensions/${id}.icon.js`).catch(() => ''),
-		css: await loadFile(`/Extensions/${id}.css`).catch(() => ''),
+		icon: index[id].icon ? await loadFile(`/Extensions/${id}.icon.js`).catch(() => '') : '',
+		css: index[id].css ? await loadFile(`/Extensions/${id}.css`).catch(() => '') : '',
 	};
 
 	extensionAttributes.forEach(({name: key, default: defaultValue}) => {
