@@ -23,10 +23,12 @@ var xkit_global_start = Date.now();  // log start timestamp
 			xkit:
 				document.location.href.indexOf('://www.tumblr.com/xkit_') !== -1
 		},
-		init: function() {
+		init: async function() {
 			if (!XKit.page.xkit) {
 				XKit.init_flags();
 			}
+			await XKit.installed.init();
+
 			$(document).ready(XKit.init_extension);
 		},
 		init_extension: function() {
@@ -49,7 +51,6 @@ var xkit_global_start = Date.now();  // log start timestamp
 		},
 		init_normal: async function() {
 			await init_main_world();
-			await XKit.installed.init_data();
 
 			try {
 
@@ -126,7 +127,6 @@ var xkit_global_start = Date.now();  // log start timestamp
 		},
 		init_frame: async function() {
 			await init_main_world();
-			await XKit.installed.init_data();
 
 			// Load frame extensions.
 			// First lets check if it actually exists.
@@ -237,10 +237,18 @@ var xkit_global_start = Date.now();  // log start timestamp
 		},
 		installed: {
 			data: {},
-			init_data: () => Promise.all(
-				XKit.installed.list().map(async extension_id => {
-					XKit.installed.data[extension_id] = await getExtensionData(extension_id);
-				})
+
+			/**
+			 * Must be awaited before running XKit.installed.get();
+			 * this allows the latter to be synchronous for historical reasons.
+			 * @returns {Promise}
+			 */
+			init: () => Promise.all(
+				XKit.installed.list().map(extension_id =>
+					getExtensionData(extension_id).then(data => {
+						XKit.installed.data[extension_id] = data;
+					})
+				)
 			),
 			add: function(extension_id, data) {
 				XKit.installed.data[extension_id] = data;
@@ -4292,7 +4300,6 @@ async function xkit_init_special() {
 	if (document.location.href.indexOf("/xkit_editor") !== -1) {
 		if (typeof(browser) !== 'undefined') {
 			try {
-				await XKit.installed.init_data();
 				await import(browser.runtime.getURL("/editor.js"));
 				XKit.extensions.xkit_editor.run();
 			} catch (e) {
