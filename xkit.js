@@ -3388,6 +3388,8 @@ var xkit_global_start = Date.now();  // log start timestamp
 	 *                        `add_tag`. Only useful if `exec` is true
 	 */
 	XKit.tools.add_function = function(func, exec, addt) {
+		console.log(new Error('XKit.tools.add_function is deprecated in XKit 7.11!'));
+		/*
 		if (!XKit.tools.add_function_nonce) {
 			const scripts = document.querySelectorAll('script');
 			for (let i = 0; i < scripts.length; i++) {
@@ -3418,6 +3420,7 @@ var xkit_global_start = Date.now();  // log start timestamp
 				'<div class="xkit-button default" id="xkit-close-message">OK</div>'
 			);
 		}
+		*/
 	};
 
 	const async_callbacks = {};
@@ -3443,7 +3446,9 @@ var xkit_global_start = Date.now();  // log start timestamp
 	 * @return {Promise} - the return value or thrown error from the
 	 *     injected function
 	 */
-	XKit.tools.async_add_function = function(func, args) {
+	XKit.tools.async_add_function = async function(func, args) {
+		console.log(new Error('XKit.tools.async_add_function is deprecated in XKit 7.11!'));
+		/*
 		return new Promise((resolve, reject) => {
 			const callback_nonce = Math.random();
 
@@ -3480,6 +3485,7 @@ var xkit_global_start = Date.now();  // log start timestamp
 
 			XKit.tools.add_function(add_func, false, {callback_nonce, args});
 		});
+		*/
 	};
 
 	/**
