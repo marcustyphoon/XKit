@@ -26,13 +26,17 @@
   "icons": {
     "128": "icon.png"
   },
-  "manifest_version": 2,
+  "manifest_version": 3,
   "minimum_chrome_version": "103.0",
   "name": "New XKit",
   "author": "New XKit Team",
-  "permissions": ["storage", "unlimitedStorage", "*://*.tumblr.com/*", "https://new-xkit.github.io/XKit/*", "https://cloud.new-xkit.com/*" ],
+  "permissions": ["storage", "unlimitedStorage"  ],
+  "host_permissions": [ "*://*.tumblr.com/*", "https://new-xkit.github.io/XKit/*", "https://cloud.new-xkit.com/*" ],
   "version": "7.10.0",
-  "web_accessible_resources": [ "*.js", "*.json", "*.css" ],
+  "web_accessible_resources": [{
+    "resources": [ "*.js", "*.json", "*.css" ],
+    "matches": [ "*://*.tumblr.com/*" ]
+  }],
   "browser_specific_settings": {
     "gecko": {
       "id": "@new-xkit",
