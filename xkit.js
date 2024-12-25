@@ -27,7 +27,10 @@ var xkit_global_start = Date.now();  // log start timestamp
 			if (!XKit.page.xkit) {
 				XKit.init_flags();
 			}
-			await XKit.installed.init();
+			await Promise.all([
+				XKit.installed.init(),
+				XKit.tools.initInject()
+			]);
 
 			$(document).ready(XKit.init_extension);
 		},
@@ -1297,45 +1300,7 @@ var xkit_global_start = Date.now();  // log start timestamp
 			Nx_XHR: function(details) {
 				details.timestamp = new Date().getTime() + Math.random();
 
-				XKit.tools.add_function(function() {
-					var xhr = new XMLHttpRequest();
-					xhr.open(add_tag.method, add_tag.url, add_tag.async || true);
-
-					if (add_tag.json === true) {
-						xhr.setRequestHeader("Content-type", "application/json");
-					}
-					for (var header in add_tag.headers) {
-						xhr.setRequestHeader(header, add_tag.headers[header]);
-					}
-
-					function callback(result) {
-						var bare_headers = xhr.getAllResponseHeaders().split("\r\n");
-						var cur_headers = {}, splitter;
-						for (var x in bare_headers) {
-							splitter = bare_headers[x].indexOf(":");
-							if (splitter === -1) { continue; }
-							cur_headers[bare_headers[x].substring(0, splitter).trim().toLowerCase()] = bare_headers[x].substring(splitter + 1).trim();
-						}
-						window.postMessage({
-							response: {
-								status: xhr.status,
-								responseText: xhr.response,
-								headers: cur_headers
-							},
-							timestamp: "xkit_" + add_tag.timestamp,
-							success: result
-						}, window.location.protocol + "//" + window.location.host);
-					}
-
-					xhr.onerror = function() { callback(false); };
-					xhr.onload = function() { callback(true); };
-
-					if (typeof add_tag.data !== "undefined") {
-						xhr.send(add_tag.data);
-					} else {
-						xhr.send();
-					}
-				}, true, details);
+				XKit.tools.inject("/main_world/Nx_XHR_send.js", [details]);
 
 				function handler(e) {
 					if (e.origin === window.location.protocol + "//" + window.location.host && e.data.timestamp === "xkit_" + details.timestamp) {
@@ -1584,7 +1549,53 @@ var xkit_global_start = Date.now();  // log start timestamp
 						true
 					);
 				});
-			}
+			},
+
+			initInject: () =>
+				new Promise(resolve => {
+					document.documentElement.addEventListener("newxkitinjectionready", resolve, {once: true});
+
+					const scriptWithNonce = [...document.scripts].find(script => script.getAttributeNames().includes("nonce"));
+
+					if (scriptWithNonce) {
+						const {nonce} = scriptWithNonce;
+						const script = document.createElement("script");
+						script.nonce = nonce;
+						script.src = browser.runtime.getURL("/main_world/index.js");
+						document.documentElement.append(script);
+					} else {
+						resolve();
+					}
+				}),
+
+			/**
+			 * Copies a function from the addon context into the page context
+			 * and returns the result of the function as a promise.
+			 *
+			 * See the main_world directory and [../main_world/index.js](../main_world/index.js).
+			 * @param {string} path - Absolute path of script to inject (will be fed to `runtime.getURL()`)
+			 * @param {Array} [args] - Array of arguments to pass to the script
+			 * @param {Element} [target] - Target element; will be accessible as the `this` value in the injected function.
+			 * @returns {Promise<any>} The transmitted result of the script
+			 */
+			inject: (path, args = [], target = document.documentElement) =>
+				new Promise((resolve, reject) => {
+					const requestId = String(Math.random());
+					const data = {path: browser.runtime.getURL(path), args, id: requestId};
+
+					const responseHandler = ({detail}) => {
+						const {id, result, exception} = JSON.parse(detail);
+						if (id !== requestId) return;
+
+						target.removeEventListener("newxkitinjectionresponse", responseHandler);
+						exception ? reject(exception) : resolve(result);
+					};
+					target.addEventListener("newxkitinjectionresponse", responseHandler);
+
+					target.dispatchEvent(
+						new CustomEvent("newxkitinjectionrequest", {detail: JSON.stringify(data), bubbles: true})
+					);
+				}),
 		},
 		interface: {
 			revision: 2,
@@ -3343,17 +3354,6 @@ var xkit_global_start = Date.now();  // log start timestamp
 	 * @return {Promise} - resolves with the translated key
 	 */
 	XKit.interface.translate = key => new Promise(resolve => {
-		function grabLanguageData() {
-			const waitForTumblrObject = setInterval(() => {
-				if (window.tumblr) {
-					clearInterval(waitForTumblrObject);
-					window.postMessage({
-						languageData: window.tumblr.languageData
-					}, `${location.protocol}//${location.host}`);
-				}
-			}, 100);
-		}
-
 		function receiveLanguageData(e) {
 			if (e.origin === `${location.protocol}//${location.host}` && e.data.languageData !== undefined) {
 				window.removeEventListener("message", receiveLanguageData);
@@ -3374,7 +3374,7 @@ var xkit_global_start = Date.now();  // log start timestamp
 			resolve(XKit.interface.translations[key]);
 		} else {
 			window.addEventListener("message", receiveLanguageData);
-			XKit.tools.add_function(grabLanguageData, true);
+			XKit.tools.inject("/main_world/grab_language_data.js");
 		}
 	});
 
@@ -3705,13 +3705,7 @@ var xkit_global_start = Date.now();  // log start timestamp
 				return this.cssMap;
 			}
 
-			this.cssMap = await XKit.tools.async_add_function(async () => {
-				if (!window.tumblr) {
-					return null;
-				}
-				const cssMap = await window.tumblr.getCssMap();
-				return cssMap;
-			});
+			this.cssMap = await XKit.tools.inject("/main_world/css_map.js");
 			return this.cssMap;
 		},
 
@@ -3772,47 +3766,6 @@ var xkit_global_start = Date.now();  // log start timestamp
 			}
 		}
 
-		function send() {
-			var request = add_tag;
-			var xhr = new XMLHttpRequest();
-			xhr.open(request.method, request.url, request.async || true);
-
-			if (request.json === true) {
-				xhr.setRequestHeader("Content-type", "application/json");
-			}
-			for (var header in request.headers) {
-				xhr.setRequestHeader(header, request.headers[header]);
-			}
-
-			function callback(result) {
-				var bare_headers = xhr.getAllResponseHeaders().split("\r\n");
-				var cur_headers = {}, splitter;
-				for (var x in bare_headers) {
-					splitter = bare_headers[x].indexOf(":");
-					if (splitter === -1) { continue; }
-					cur_headers[bare_headers[x].substring(0, splitter).trim().toLowerCase()] = bare_headers[x].substring(splitter + 1).trim();
-				}
-				window.postMessage({
-					response: {
-						status: xhr.status,
-						responseText: xhr.response,
-						headers: cur_headers
-					},
-					timestamp: "xkit_" + request.timestamp,
-					success: result
-				}, window.location.protocol + "//" + window.location.host);
-			}
-
-			xhr.onerror = function() { callback(false); };
-			xhr.onload = function() { callback(true); };
-
-			if (typeof request.data !== "undefined") {
-				xhr.send(request.data);
-			} else {
-				xhr.send();
-			}
-		}
-
 		function receive(e) {
 			if (e.origin === window.location.protocol + "//" + window.location.host && e.data.timestamp === "xkit_" + details.timestamp) {
 				window.removeEventListener("message", receive);
@@ -3835,7 +3788,7 @@ var xkit_global_start = Date.now();  // log start timestamp
 		}
 
 		window.addEventListener("message", receive);
-		XKit.tools.add_function(send, true, details);
+		XKit.tools.inject("/main_world/Nx_XHR_send.js", [details]);
 
 	});
 
@@ -3905,17 +3858,7 @@ var xkit_global_start = Date.now();  // log start timestamp
 	XKit.interface.react = {
 		post_props: async function(post_id) {
 			// eslint-disable-next-line no-shadow
-			return XKit.tools.async_add_function(({post_id}) => {
-				const keyStartsWith = (obj, prefix) =>
-					Object.keys(obj).find(key => key.startsWith(prefix));
-				const element = document.querySelector(`[data-id="${post_id}"]`);
-				let fiber = element[keyStartsWith(element, '__reactFiber')];
-
-				while (fiber.memoizedProps.timelineObject === undefined) {
-					fiber = fiber.return;
-				}
-				return fiber.memoizedProps.timelineObject;
-			}, {post_id});
+			return XKit.tools.inject("/main_world/post_props.js", [post_id]);
 		},
 
 		post: async function($element) {
@@ -4192,6 +4135,10 @@ var xkit_global_start = Date.now();  // log start timestamp
 		destroy_collapsed: function(id) {
 			$(`.${id}-collapsed`).removeClass(`${id}-collapsed`);
 			$(`.${id}-collapsed-note`).remove();
+		},
+
+		api_fetch: async function(resource, init) {
+			return XKit.tools.inject("/main_world/api_fetch.js", [{ resource, init, headerVersion: XKit.version }]);
 		}
 	};
 

@@ -86,41 +86,12 @@ XKit.extensions.xkit_patches = new Object({
 
 		window.addEventListener("message", XKit.blog_listener.eventHandler);
 
-		// Scrape Tumblr's data object now that we can run add_function
-		const blog_scraper = XKit.page.react ?
-			function() {
-				/* globals tumblr */
-				let blogs = [];
-				Promise.race([
-					new Promise((resolve) => setTimeout(resolve, 30000)),
-					(async () => {
-						const {response} = await tumblr.apiFetch("/v2/user/info", {
-							queryParams: {'fields[blogs]': 'name'},
-						});
-						blogs = response.user.blogs.map(blog => blog.name);
-					})()
-				]).finally(() => {
-					window.postMessage({
-						xkit_blogs: blogs
-					}, window.location.protocol + "//" + window.location.host);
-				});
-			} :
-			function() {
-				var blogs = [];
-				try {
-					var models = Tumblr.dashboardControls.allTumblelogs;
-					models.filter(function(model) {
-						return model.attributes.hasOwnProperty("is_current");
-					}).forEach(function(model) {
-						blogs.push(model.attributes.name);
-					});
-				} catch (e) {} finally {
-					window.postMessage({
-						xkit_blogs: blogs
-					}, window.location.protocol + "//" + window.location.host);
-				}
-			};
-		XKit.tools.add_function(blog_scraper, true);
+		// Scrape Tumblr's data object
+		XKit.tools.inject(
+			XKit.page.react
+				? "/main_world/blog_scraper_react.js"
+				: "/main_world/blog_scraper.js"
+		);
 
 		XKit.tools.add_function(function fix_autoplaying_yanked_videos() {
 
