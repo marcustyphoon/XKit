@@ -46,7 +46,7 @@
     no-useless-escape: off
     no-prototype-builtins: off
   overrides:
-    - files: "*.mjs"
+    - files: ["*.mjs", "main_world/*"]
       parserOptions:
         sourceType: module
   globals:
