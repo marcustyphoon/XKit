@@ -3371,6 +3371,8 @@ var xkit_global_start = Date.now();  // log start timestamp
 	 *                        `add_tag`. Only useful if `exec` is true
 	 */
 	XKit.tools.add_function = function(func, exec, addt) {
+		console.log(new Error('XKit.tools.add_function is deprecated in XKit 7.11!'));
+		/*
 		if (!XKit.tools.add_function_nonce) {
 			const scripts = document.querySelectorAll('script');
 			for (let i = 0; i < scripts.length; i++) {
@@ -3401,6 +3403,7 @@ var xkit_global_start = Date.now();  // log start timestamp
 				'<div class="xkit-button default" id="xkit-close-message">OK</div>'
 			);
 		}
+		*/
 	};
 
 	const async_callbacks = {};
