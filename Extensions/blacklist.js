@@ -1197,9 +1197,9 @@ XKit.extensions.blacklist = new Object({
 		$('#xkit-bne-button').on('click', () => showNativeExport().catch(showNativeExportError));
 
 		async function showNativeExport() {
-			const currentFilteredTags = await apiFetch('/v2/user/filtered_tags')
+			const currentFilteredTags = await XKit.interface.react.api_fetch('/v2/user/filtered_tags')
 				.then(({ response: { filteredTags } }) => filteredTags);
-			const currentFilteredContent = await apiFetch('/v2/user/filtered_content')
+			const currentFilteredContent = await XKit.interface.react.api_fetch('/v2/user/filtered_content')
 				.then(({ response: { filteredContent } }) => filteredContent);
 
 			const blacklistItemData = (XKit.extensions.blacklist.blacklisted || [])
@@ -1269,12 +1269,12 @@ XKit.extensions.blacklist = new Object({
 				if (newTagWords.length || newContentWords.length) {
 					Promise.all([
 						newTagWords.length &&
-							apiFetch('/v2/user/filtered_tags', {
+							XKit.interface.react.api_fetch('/v2/user/filtered_tags', {
 								method: 'POST',
 								body: { filtered_tags: newTagWords },
 							}),
 						newContentWords.length &&
-							apiFetch('/v2/user/filtered_content', {
+							XKit.interface.react.api_fetch('/v2/user/filtered_content', {
 								method: 'POST',
 								body: { filtered_content: newContentWords },
 							}),
@@ -1383,19 +1383,6 @@ XKit.extensions.blacklist = new Object({
 				.split(',')
 				.map((word) => word.trim().replace(/^#/, ''))
 				.filter(Boolean);
-		}
-
-		async function apiFetch(resource, init) {
-			return XKit.tools.async_add_function(
-				async ({ resource, init = {}, headerVersion }) => { // eslint-disable-line no-shadow
-					// add XKit header to all API requests
-					if (!init.headers) init.headers = {};
-					init.headers['X-XKit-Version'] = headerVersion;
-
-					return window.tumblr.apiFetch(resource, init);
-				},
-			{ resource, init, headerVersion: XKit.version }
-			);
 		}
 	}
 
