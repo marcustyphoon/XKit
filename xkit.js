@@ -4533,6 +4533,23 @@ const extensionAttributes = [
 	{name: "slow", default: "false", required: false},
 ];
 
+const obsoleteExtensionFallback = {
+	running: false,
+	run() {
+		this.running = true;
+	},
+	destroy() {
+		this.running = false;
+	},
+	cpanel(m_div) {
+		$(m_div).prepend(`
+			<div id="xkit-extension-panel-obsolete">
+					This extension is not currently supported.
+			</div>
+		`);
+	}
+};
+
 async function loadExtensionData(id) {
 	const contents = await loadFile(`/Extensions/${id}.js`);
 	const index = JSON.parse(await loadFile("/Extensions/_index.json"));
@@ -4540,7 +4557,9 @@ async function loadExtensionData(id) {
 	const extension = {
 		id,
 		script: contents,
-		import: () => import(browser.runtime.getURL(`/Extensions/${id}.js`)),
+		import: () => import(browser.runtime.getURL(`/Extensions/${id}.js`)).then(() => {
+			XKit.extensions[id] ??= obsoleteExtensionFallback;
+		}),
 		file: "found",
 		server: "up",
 		errors: false,
