@@ -6,6 +6,7 @@
 //* FRAME false **//
 //* BETA false **//
 
+/*
 XKit.extensions.post_crushes = new Object({
 
 	running: false,
@@ -269,3 +270,4 @@ XKit.extensions.post_crushes = new Object({
 	}
 
 });
+*/

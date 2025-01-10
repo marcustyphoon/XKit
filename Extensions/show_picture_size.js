@@ -5,6 +5,7 @@
 //* FRAME false **//
 //* BETA false **//
 
+/*
 XKit.extensions.show_picture_size = new Object({
 
 	running: false,
@@ -70,3 +71,4 @@ XKit.extensions.show_picture_size = new Object({
 		});
 	}
 });
+*/

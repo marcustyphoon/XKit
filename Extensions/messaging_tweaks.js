@@ -6,6 +6,7 @@
 //* FRAME false **//
 //* BETA false **//
 
+/*
 XKit.extensions.messaging_tweaks = new Object({
 
 	running: false,
@@ -467,3 +468,4 @@ XKit.extensions.messaging_tweaks = new Object({
 	}
 
 });
+*/

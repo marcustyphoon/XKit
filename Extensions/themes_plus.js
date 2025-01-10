@@ -6,6 +6,7 @@
 //* FRAME false **//
 //* BETA false **//
 
+/*
 jQuery.fn.selectText = function() {
 	var doc = document;
 	var element = this[0];
@@ -23,6 +24,7 @@ jQuery.fn.selectText = function() {
 		selection.addRange(range);
 	}
 };
+*/
 
 /**
  *
@@ -33,6 +35,7 @@ jQuery.fn.selectText = function() {
  *
  */
 /* eslint-disable id-length, no-unused-vars */
+/*
 (function($) {
 	var ColorPicker = function() {
 		var
@@ -521,9 +524,11 @@ jQuery.fn.selectText = function() {
 		ColorPickerShow: ColorPicker.showPicker,
 		ColorPickerSetColor: ColorPicker.setColor
 	});
-	/* eslint-enable id-length, no-unused-vars */
 })(jQuery);
+*/
+/* eslint-enable id-length, no-unused-vars */
 
+/*
 XKit.extensions.themes_plus = new Object({
 
 	running: false,
@@ -1054,11 +1059,11 @@ XKit.extensions.themes_plus = new Object({
 			// var m_of = XKit.extensions.themes_plus.options[m_option_id].of;
 			// var m_attr = XKit.extensions.themes_plus.options[m_option_id].attr;
 
-			/*XKit.tools.remove_css("xkit-themes-plus-preview-" + m_option_id);
+			// XKit.tools.remove_css("xkit-themes-plus-preview-" + m_option_id);
 
-			var m_css = m_of + " { background-image: url('" + $(this).val() + "') !important; background-repeat: repeat; }";
+			// var m_css = m_of + " { background-image: url('" + $(this).val() + "') !important; background-repeat: repeat; }";
 
-			XKit.tools.add_css(m_css, "xkit-themes-plus-preview-" + m_option_id);*/
+			// XKit.tools.add_css(m_css, "xkit-themes-plus-preview-" + m_option_id);
 
 			XKit.extensions.themes_plus.current_theme[m_option_id] = $(this).val();
 			XKit.extensions.themes_plus.render(true);
@@ -1071,12 +1076,12 @@ XKit.extensions.themes_plus = new Object({
 
 			var m_option_id = $(this).parentsUntil(".xkit-themes-plus-option").parent().attr('data-option');
 
-			/*XKit.tools.remove_css("xkit-themes-plus-preview-" + m_option_id);
+			// XKit.tools.remove_css("xkit-themes-plus-preview-" + m_option_id);
 
-			if ($(this).hasClass("selected")) {
-				var m_css = XKit.extensions.themes_plus.options[m_option_id].on_true;
-				XKit.tools.add_css(m_css, "xkit-themes-plus-preview-" + m_option_id);
-			}*/
+			// if ($(this).hasClass("selected")) {
+			// 	var m_css = XKit.extensions.themes_plus.options[m_option_id].on_true;
+			// 	XKit.tools.add_css(m_css, "xkit-themes-plus-preview-" + m_option_id);
+			// }
 
 			XKit.extensions.themes_plus.current_theme[m_option_id] = $(this).hasClass("selected");
 			XKit.extensions.themes_plus.render(true);
@@ -1113,13 +1118,13 @@ XKit.extensions.themes_plus = new Object({
 				},
 				onChange: function(hsb, hex, rgb) {
 					$(this_picker).css('backgroundColor', '#' + hex);
-					/*XKit.tools.remove_css("xkit-themes-plus-preview-" + m_option_id);
-					var m_css = "";
-					for (var i=0;i<m_of.length;i++) {
-						if (m_attr[i] === "background-color") { m_attr[i] = "background"; }
-						m_css = m_css + " " + m_of[i] + " { " + m_attr[i] + ": #" + hex + "; } ";
-					}
-					XKit.tools.add_css(m_css, "xkit-themes-plus-preview-" + m_option_id);*/
+					// XKit.tools.remove_css("xkit-themes-plus-preview-" + m_option_id);
+					// var m_css = "";
+					// for (var i=0;i<m_of.length;i++) {
+					// 	if (m_attr[i] === "background-color") { m_attr[i] = "background"; }
+					// 	m_css = m_css + " " + m_of[i] + " { " + m_attr[i] + ": #" + hex + "; } ";
+					// }
+					// XKit.tools.add_css(m_css, "xkit-themes-plus-preview-" + m_option_id);
 					XKit.extensions.themes_plus.current_theme[m_option_id] = "#" + hex;
 					XKit.extensions.themes_plus.render(true);
 				}
@@ -1381,3 +1386,4 @@ XKit.extensions.themes_plus = new Object({
 	}
 
 });
+*/

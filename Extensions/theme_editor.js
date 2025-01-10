@@ -6,10 +6,12 @@
 //* FRAME false **//
 //* BETA false **//
 
+// const testing_theme = "/*\nTheme title\nTheme description (one-line)\nSTUDIOXENIX\n1\n*/\n\nbody {\n\tbackground: red;\n}\n\n#content {\n\tbackground: rgba(155,90,120,0.9);\n}\n\n.post {\n\tbackground: blue;\n\tborder-radius: 20px;\n}\n\n.post_content{\n\tbackground: transparent !important;\n}\n\n#right_column:after {\n\tbackground: none !important;\n}\n\n.controls_section li {\n\tbackground: green;\n}",
+
+/*
 XKit.extensions.theme_editor = new Object({
 
 	running: false,
-	testing_theme: "/*\nTheme title\nTheme description (one-line)\nSTUDIOXENIX\n1\n*/\n\nbody {\n\tbackground: red;\n}\n\n#content {\n\tbackground: rgba(155,90,120,0.9);\n}\n\n.post {\n\tbackground: blue;\n\tborder-radius: 20px;\n}\n\n.post_content{\n\tbackground: transparent !important;\n}\n\n#right_column:after {\n\tbackground: none !important;\n}\n\n.controls_section li {\n\tbackground: green;\n}",
 
 	run: function() {
 		this.running = true;
@@ -58,7 +60,7 @@ XKit.extensions.theme_editor = new Object({
 		$("#xkit-themes-user-theme").remove();
 		$("#xkit-theme-editor-user-theme").remove();
 
-		var m_theme = XKit.storage.get("theme_editor", "my_theme", XKit.extensions.theme_editor.testing_theme);
+		var m_theme = XKit.storage.get("theme_editor", "my_theme", testing_theme);
 
 		if (typeof passed_theme !== "undefined") {
 			m_theme = passed_theme;
@@ -75,7 +77,7 @@ XKit.extensions.theme_editor = new Object({
 			$("#xkit-theme-editor-window").remove();
 		}
 
-		var m_theme = XKit.storage.get("theme_editor", "my_theme", XKit.extensions.theme_editor.testing_theme);
+		var m_theme = XKit.storage.get("theme_editor", "my_theme", testing_theme);
 
 		var m_html = "<div id=\"xkit-theme-editor-shadow\">&nbsp;</div>" +
 				"<div id=\"xkit-theme-editor-window\">" +
@@ -138,3 +140,4 @@ XKit.extensions.theme_editor = new Object({
 	}
 
 });
+*/

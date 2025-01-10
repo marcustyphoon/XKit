@@ -6,6 +6,7 @@
 //* FRAME false **//
 //* BETA false **//
 
+/*
 XKit.extensions.satsukimous = new Object({
 
 	running: false,
@@ -147,3 +148,4 @@ XKit.extensions.satsukimous = new Object({
 	}
 
 });
+*/

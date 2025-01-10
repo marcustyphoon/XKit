@@ -6,6 +6,7 @@
 //* FRAME false **//
 //* BETA false **//
 
+/*
 XKit.extensions.unreverse2 = new Object({
 
 	running: false,
@@ -59,3 +60,4 @@ XKit.extensions.unreverse2 = new Object({
 	}
 
 });
+*/

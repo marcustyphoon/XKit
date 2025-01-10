@@ -6,6 +6,7 @@
 //* FRAME false **//
 //* BETA false **//
 
+/*
 XKit.extensions.mass_deleter = new Object({
 
 	running: false,
@@ -422,3 +423,4 @@ XKit.extensions.mass_deleter = new Object({
 	}
 
 });
+*/

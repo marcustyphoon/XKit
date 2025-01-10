@@ -6,6 +6,7 @@
 //* FRAME false **//
 //* BETA false **//
 
+/*
 XKit.extensions.tag_replacer = new Object({
 
 	running: false,
@@ -337,3 +338,4 @@ XKit.extensions.tag_replacer = new Object({
 	}
 
 });
+*/
