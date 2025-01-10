@@ -6,6 +6,7 @@
 //* FRAME false **//
 //* BETA false **//
 
+/*
 XKit.extensions.mirrorposts = new Object({
 
 	running: false,
@@ -87,3 +88,4 @@ XKit.extensions.mirrorposts = new Object({
 	}
 
 });
+*/

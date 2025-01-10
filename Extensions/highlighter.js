@@ -7,6 +7,7 @@
 //* BETA false **//
 //* SLOW true **//
 
+/*
 XKit.extensions.highlighter = new Object({
 
 	running: false,
@@ -128,13 +129,13 @@ XKit.extensions.highlighter = new Object({
 		});
 
 		XKit.tools.add_function(function() {
-			/*Tumblr.Events.on("DOMEventor:flatscroll", function(n) {
-				console.log(JSON.stringify(n));
-				//n.documentHeight = 0;
-				// if ((n.documentHeight - n.windowScrollY) < n.windowHeight * 3) {
-				console.log(" -- 1] " + (n.documentHeight - n.windowScrollY));
-				console.log(" -- 2] " + n.windowHeight * 3 + " <-- must be smaller than this");
-			});*/
+			// Tumblr.Events.on("DOMEventor:flatscroll", function(n) {
+			// 	console.log(JSON.stringify(n));
+			// 	//n.documentHeight = 0;
+			// 	// if ((n.documentHeight - n.windowScrollY) < n.windowHeight * 3) {
+			// 	console.log(" -- 1] " + (n.documentHeight - n.windowScrollY));
+			// 	console.log(" -- 2] " + n.windowHeight * 3 + " <-- must be smaller than this");
+			// });
 			Tumblr.Events.trigger("DOMEventor:updateRect");
 		}, true, "");
 
@@ -424,3 +425,4 @@ XKit.extensions.highlighter = new Object({
 	}
 
 });
+*/

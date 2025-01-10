@@ -6,6 +6,7 @@
 //* FRAME false **//
 //* BETA false **//
 
+/*
 XKit.extensions.read_more_now = new Object({
 
 	running: false,
@@ -41,7 +42,7 @@ XKit.extensions.read_more_now = new Object({
 		let postID;
 
 		if (!href.includes("t.umblr.com")) {
-			[url, /* discard */, postID] = href.split("://")[1].split("/");
+			[url, _discard, postID] = href.split("://")[1].split("/");
 		} else {
 			let $user_link = $link.parents(".reblog-list-item").find(".reblog-tumblelog-name");
 			if (!$user_link.hasClass("inactive") && $user_link.attr("data-peepr")) {
@@ -124,3 +125,4 @@ XKit.extensions.read_more_now = new Object({
 	}
 
 });
+*/

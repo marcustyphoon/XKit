@@ -5,6 +5,7 @@
 //* FRAME false **//
 //* BETA false **//
 
+/*
 XKit.extensions.transparent_img_hover = new Object({
 	running: false,
 
@@ -18,3 +19,4 @@ XKit.extensions.transparent_img_hover = new Object({
 		this.running = false;
 	}
 });
+*/

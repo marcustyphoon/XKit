@@ -7,6 +7,7 @@
 //* BETA false **//
 //* SLOW false **//
 
+/*
 XKit.extensions.tagviewer = new Object({
 
 	running: false,
@@ -297,3 +298,4 @@ XKit.extensions.tagviewer = new Object({
 		this.running = false;
 	}
 });
+*/

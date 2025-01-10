@@ -7,6 +7,7 @@
 //* BETA false **//
 //* SLOW true **//
 
+/*
 XKit.extensions.cleanfeed = new Object({
 
 	running: false,
@@ -472,3 +473,4 @@ XKit.extensions.cleanfeed = new Object({
 	}
 
 });
+*/

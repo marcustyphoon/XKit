@@ -5,6 +5,7 @@
 //* FRAME false **//
 //* BETA false **//
 
+/*
 XKit.extensions.scroll_to_bottom = new Object({
 
 	running: false,
@@ -51,3 +52,4 @@ XKit.extensions.scroll_to_bottom = new Object({
 	}
 
 });
+*/

@@ -6,6 +6,7 @@
 //* FRAME false **//
 //* BETA false **//
 
+/*
 XKit.extensions.post_limit_checker = new Object({
 
 	running: false,
@@ -182,3 +183,4 @@ XKit.extensions.post_limit_checker = new Object({
 	}
 
 });
+*/

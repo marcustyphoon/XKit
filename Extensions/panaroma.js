@@ -7,6 +7,7 @@
 //* BETA false **//
 //* SLOW true **//
 
+/*
 XKit.extensions.panaroma = new Object({
 
 	running: false,
@@ -30,7 +31,6 @@ XKit.extensions.panaroma = new Object({
 			const increase_by = header_max_width - container_max_width;
 
 			XKit.tools.async_add_function(async () => {
-				/* globals tumblr */
 				return await tumblr.getCssMap();
 			})
 			.then(({bluespaceLayout, container, main, audioBlock, videoBlock}) => {
@@ -126,3 +126,4 @@ XKit.extensions.panaroma = new Object({
 	}
 
 });
+*/

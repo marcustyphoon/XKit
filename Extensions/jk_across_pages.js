@@ -5,26 +5,22 @@
 //* FRAME false **//
 //* BETA true **//
 
+/*
 XKit.extensions.jk_across_pages = new Object({
-	/*
-	 * If the top of the last post is this far below the top of the screen or less, j will move to the next page.
-	 */
+
+	// If the top of the last post is this far below the top of the screen or less, j will move to the next page.
 	scrollBufferJ: 60,
-	/*
-	 * If the top of first post is this far below the top of the screen or more, k will move to the previous page.
-	 */
+
+	// If the top of first post is this far below the top of the screen or more, k will move to the previous page.
 	scrollBufferK: 59,
-	/*
-	 * Leave this much overlap when using view_entire_posts
-	 */
+
+	// Leave this much overlap when using view_entire_posts
 	scrollBufferInside: 50,
-	/*
-	 * This is the size of the gap between posts
-	 */
+
+	// This is the size of the gap between posts
 	postBuffer: 20,
-	/*
-	 * How long scroll animations should take (milliseconds)
-	 */
+
+	// How long scroll animations should take (milliseconds)
 	scrollAnimationDuration: 100,
 
 	$posts: false,
@@ -73,9 +69,12 @@ XKit.extensions.jk_across_pages = new Object({
 
 		var that = this;
 		jQuery(document.body).bind('keydown.xkit_jk_across_pages', function(evt) {
+			const jKey = 74;
+			const kKey = 75;
+
 			if (!evt.shiftKey && !evt.ctrlKey && !evt.altKey && !evt.metaKey) {
 				// If the key wasn't J or K, we have nothing to do here.
-				if (evt.which !== 74 /* j */ && evt.which !== 75 /* k */) return;
+				if (evt.which !== jKey && evt.which !== kKey) return;
 
 				// If the new post field has focus, do nothing.
 				if (jQuery('.scrollverlay.active').length !== 0) return;
@@ -86,12 +85,12 @@ XKit.extensions.jk_across_pages = new Object({
 
 				that.$posts = jQuery('.post_container').not('#new_post_buttons');
 
-				if (that.preferences.view_entire_posts.value && evt.which === 74 /* j */ &&
+				if (that.preferences.view_entire_posts.value && evt.which === jKey &&
 					that.postAtY(that.scrollBufferJ + 1)[0] == that.postAtY(window.innerHeight - that.scrollBufferJ)[0]) {
 
 					evt.stopPropagation(); // Try to stop Tumblr's event listener
 
-					/* Animate this twice to make sure Tumblr's scrolling doesn't override it */
+					// Animate this twice to make sure Tumblr's scrolling doesn't override it
 					var scrollTo = window.scrollY + window.innerHeight - that.scrollBufferInside;
 					jQuery(document.body).animate({ scrollTop: scrollTo }, that.scrollAnimationDuration, function() {
 						$(this).animate({ scrollTop: scrollTo }, that.scrollAnimationDuration);
@@ -100,14 +99,14 @@ XKit.extensions.jk_across_pages = new Object({
 					return; // Don't try to go to the next page
 				}
 
-				if (evt.which === 74 /* j */ && (that.$posts.last().offset().top - window.scrollY <= that.scrollBufferJ || window.scrollY + window.innerHeight >= that.$posts.last().offset().top + that.$posts.last().height())) {
+				if (evt.which === jKey && (that.$posts.last().offset().top - window.scrollY <= that.scrollBufferJ || window.scrollY + window.innerHeight >= that.$posts.last().offset().top + that.$posts.last().height())) {
 					if (jQuery('#next_page_link').length > 0) {
 						if (that.preferences.show_notifications.value === true) XKit.notifications.add("Moving to next page", "ok");
 						window.location = jQuery('#next_page_link').attr('href') + '#jk_across_pages_first';
 					} else {
 						if (that.preferences.show_notifications.value === true) XKit.notifications.add("Already at last page", "warning");
 					}
-				} else if (evt.which === 75 /* k */ && that.$posts.first().offset().top - window.scrollY >= that.scrollBufferK) {
+				} else if (evt.which === kKey && that.$posts.first().offset().top - window.scrollY >= that.scrollBufferK) {
 					if (jQuery('#previous_page_link').length > 0) {
 						if (that.preferences.show_notifications.value === true) XKit.notifications.add("Moving to previous page", "ok");
 						window.location = jQuery('#previous_page_link').attr('href') + '#jk_across_pages_last';
@@ -136,3 +135,4 @@ XKit.extensions.jk_across_pages = new Object({
 	}
 
 });
+*/

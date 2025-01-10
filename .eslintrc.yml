@@ -51,6 +51,7 @@
         sourceType: module
   globals:
     _: readonly
+    moment: readonly
     XKit: writable
     XBridge: writable
     centerIt: writable

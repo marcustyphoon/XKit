@@ -6,6 +6,7 @@
 //* FRAME false **//
 //* BETA false **//
 
+/*
 XKit.extensions.find_inactives = new Object({
 
 	running: false,
@@ -357,3 +358,4 @@ XKit.extensions.find_inactives = new Object({
 	}
 
 });
+*/

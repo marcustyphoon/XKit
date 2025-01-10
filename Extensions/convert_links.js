@@ -6,6 +6,7 @@
 //* FRAME false **//
 //* BETA false **//
 
+/*
 XKit.extensions.convert_links = new Object({
 
 	running: false,
@@ -82,3 +83,4 @@ XKit.extensions.convert_links = new Object({
 	}
 
 });
+*/

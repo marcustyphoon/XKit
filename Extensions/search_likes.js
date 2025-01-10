@@ -6,6 +6,7 @@
 //* FRAME false **//
 //* BETA false **//
 
+/*
 XKit.extensions.search_likes = new Object({
 
 	running: false,
@@ -246,7 +247,7 @@ XKit.extensions.search_likes = new Object({
 
 	return_highlighted_html: function(src_str, term) {
 
-		/* from http://jsfiddle.net/UPs3V/ */
+		// from http://jsfiddle.net/UPs3V/
 
 		try {
 
@@ -315,3 +316,4 @@ XKit.extensions.search_likes = new Object({
 	}
 
 });
+*/

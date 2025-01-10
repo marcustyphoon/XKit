@@ -6,6 +6,7 @@
 //* FRAME false **//
 //* BETA false **//
 
+/*
 XKit.extensions.find_blogs = new Object({
 
 	running: false,
@@ -453,3 +454,4 @@ XKit.extensions.find_blogs = new Object({
 	}
 
 });
+*/
