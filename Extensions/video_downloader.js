@@ -5,6 +5,7 @@
 //* DEVELOPER tlitookilakin **//
 //* FRAME false **//
 //* BETA false **//
+/*
 XKit.extensions.video_downloader = new Object({
 
 	running: false,
@@ -50,3 +51,4 @@ XKit.extensions.video_downloader = new Object({
 		}, 1500);
 	}
 });
+*/

@@ -7,6 +7,7 @@
 //* DETAILS This extension replaces both XPreview and Only Replies extensions of XKit 6. Using this, you can hover over notifications to get post notes, and toggle the option that dims non-reply notifications. **//
 //* SLOW true **//
 
+/*
 XKit.extensions.notifications_plus = new Object({
 
 	running: false,
@@ -154,11 +155,11 @@ XKit.extensions.notifications_plus = new Object({
 
 	xpreview_show: function(obj) {
 
-		/*var obj = $(e.target);
+		// var obj = $(e.target);
 
-		if ($(obj).hasClass("notification") !== true) {
-			obj = $(obj).parentsUntil('#posts')[0];
-		}*/
+		// if ($(obj).hasClass("notification") !== true) {
+		// 	obj = $(obj).parentsUntil('#posts')[0];
+		// }
 
 		// get post URL.
 		var post_url = $(obj).find(".preview_frame").attr('href');
@@ -286,3 +287,4 @@ XKit.extensions.notifications_plus = new Object({
 	}
 
 });
+*/
