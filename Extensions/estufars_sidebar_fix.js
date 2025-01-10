@@ -5,6 +5,7 @@
 //* FRAME false **//
 //* BETA false **//
 
+/*
 XKit.extensions.estufars_sidebar_fix = new Object({
 
 	running: false,
@@ -114,3 +115,4 @@ XKit.extensions.estufars_sidebar_fix = new Object({
 		}, 500);
 	}
 });
+*/

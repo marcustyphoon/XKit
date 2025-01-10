@@ -5,6 +5,7 @@
 //* FRAME false **//
 //* BETA false **//
 
+/*
 XKit.extensions.dont_stretch_photosets = new Object({
 	running: false,
 
@@ -18,3 +19,4 @@ XKit.extensions.dont_stretch_photosets = new Object({
 		this.running = false;
 	}
 });
+*/

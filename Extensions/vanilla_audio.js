@@ -6,6 +6,7 @@
 //* FRAME false **//
 //* BETA true **//
 
+/*
 XKit.extensions.vanilla_audio = new Object({
 
 	running: false,
@@ -58,3 +59,4 @@ XKit.extensions.vanilla_audio = new Object({
 	}
 
 });
+*/

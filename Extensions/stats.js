@@ -6,6 +6,7 @@
 //* FRAME false **//
 //* BETA false **//
 
+/*
 XKit.extensions.stats = new Object({
 
 	running: false,
@@ -619,3 +620,4 @@ XKit.extensions.stats = new Object({
 	}
 
 });
+*/

@@ -7,6 +7,7 @@
 //* BETA false **//
 //* SLOW true **//
 
+/*
 XKit.extensions.shorten_posts = new Object({
 
 	running: false,
@@ -267,3 +268,4 @@ XKit.extensions.shorten_posts = new Object({
 	}
 
 });
+*/

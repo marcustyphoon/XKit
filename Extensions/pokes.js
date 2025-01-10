@@ -7,6 +7,7 @@
 //* BETA true **//
 //* SLOW true **//
 
+/*
 XKit.extensions.pokes = {
 	running: false,
 	pokedex_url: "https://new-xkit.github.io/XKit/Extensions/dist/page/pokedex.json",
@@ -479,3 +480,4 @@ XKit.extensions.pokes = {
 		}
 	}
 };
+*/

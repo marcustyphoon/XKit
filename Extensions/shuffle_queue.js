@@ -6,6 +6,7 @@
 //* FRAME false **//
 //* BETA false **//
 
+/*
 XKit.extensions.shuffle_queue = new Object({
 
 	running: false,
@@ -112,7 +113,7 @@ XKit.extensions.shuffle_queue = new Object({
 
 			let postIDs = [];
 			$("#posts [data-pageable]").each(function() {
-				let [ /* "post" */, postID] = $(this).attr("data-pageable").split("_");
+				let [ _post, postID] = $(this).attr("data-pageable").split("_");
 				postIDs.push(postID);
 			});
 
@@ -275,3 +276,4 @@ XKit.extensions.shuffle_queue = new Object({
 	}
 
 });
+*/

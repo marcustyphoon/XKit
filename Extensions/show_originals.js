@@ -7,6 +7,7 @@
 //* BETA false **//
 //* SLOW true **//
 
+/*
 XKit.extensions.show_originals = new Object({
 
 	running: false,
@@ -135,3 +136,4 @@ XKit.extensions.show_originals = new Object({
 	}
 
 });
+*/

@@ -6,6 +6,7 @@
 //* FRAME false **//
 //* BETA false **//
 
+/*
 XKit.extensions.mutualchecker = new Object({
 
 	running: false,
@@ -122,3 +123,4 @@ XKit.extensions.mutualchecker = new Object({
 		XKit.tools.remove_css("mutualchecker");
 	}
 });
+*/
