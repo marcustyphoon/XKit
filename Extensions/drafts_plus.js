@@ -5,6 +5,7 @@
 //* FRAME false **//
 //* BETA false **//
 
+/*
 XKit.extensions.drafts_plus = new Object({
 
 	running: false,
@@ -366,3 +367,4 @@ XKit.extensions.drafts_plus = new Object({
 	}
 
 });
+*/

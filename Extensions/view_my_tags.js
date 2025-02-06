@@ -5,6 +5,7 @@
 //* FRAME false **//
 //* BETA false **//
 
+/*
 XKit.extensions.view_my_tags = new Object({
 
 	running: false,
@@ -232,3 +233,4 @@ XKit.extensions.view_my_tags = new Object({
 	}
 
 });
+*/

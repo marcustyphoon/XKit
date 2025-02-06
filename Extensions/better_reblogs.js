@@ -5,6 +5,7 @@
 //* FRAME false **//
 //* BETA false **//
 
+/*
 XKit.extensions.better_reblogs = new Object({
 
 	running: false,
@@ -433,7 +434,6 @@ XKit.extensions.better_reblogs = new Object({
 
 	hex_to_rgb: function(hex) {
 		// From: http://stackoverflow.com/questions/5623838/rgb-to-hex-and-hex-to-rgb
-		/* eslint-disable id-length */
 
 		var result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
 		return result ? {
@@ -441,8 +441,7 @@ XKit.extensions.better_reblogs = new Object({
 			g: parseInt(result[2], 16),
 			b: parseInt(result[3], 16)
 		} : null;
-
-		/* eslint-enable id-length */
 	},
 
 });
+*/

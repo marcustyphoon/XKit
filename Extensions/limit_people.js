@@ -6,6 +6,7 @@
 //* FRAME false **//
 //* BETA false **//
 
+/*
 XKit.extensions.limit_people = new Object({
 
 	running: false,
@@ -168,3 +169,4 @@ XKit.extensions.limit_people = new Object({
 	}
 
 });
+*/

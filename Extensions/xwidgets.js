@@ -5,6 +5,7 @@
 //* FRAME false **//
 //* BETA false **//
 
+/*
 XKit.extensions.xwidgets = new Object({
 
 	running: false,
@@ -510,8 +511,8 @@ XKit.extensions.xwidgets = new Object({
 				// var hrs = -1.575 + Math.PI * hr / 6 + Math.PI * parseInt(now.getMinutes()) / 360;
 				if (hr < 0) hr += 24;
 				if (hr > 23) hr -= 24;
-				/* ampm = (hr > 11)?"PM":"AM";
-				statusampm = ampm;*/
+				// ampm = (hr > 11)?"PM":"AM";
+				// statusampm = ampm;
 
 				if (hr > 11) {
 				//	hr = hr + 12;
@@ -1337,3 +1338,4 @@ XKit.extensions.xwidgets = new Object({
 	}
 
 });
+*/

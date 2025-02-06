@@ -712,6 +712,17 @@
 	text-transform: uppercase;
 }
 
+#xkit-extension-panel-obsolete {
+	text-align: center;
+	padding: 10px;
+	margin-top: 85px;
+	line-height: 0;
+	color: var(--xkit-on-secondary);
+	font-size: 14px;
+	font-weight: normal;
+	text-transform: uppercase;
+}
+
 #xkit-extensions-panel-right .xkit-others-panel {
 	padding: 23px 30px;
 }

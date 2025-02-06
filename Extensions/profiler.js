@@ -6,6 +6,7 @@
 //* FRAME false **//
 //* BETA false **//
 
+/*
 XKit.extensions.profiler = new Object({
 
 	running: false,
@@ -515,3 +516,4 @@ XKit.extensions.profiler = new Object({
 	}
 
 });
+*/

@@ -6,6 +6,7 @@
 //* FRAME false **//
 //* BETA false **//
 
+/*
 XKit.extensions.themes = new Object({
 
 	running: false,
@@ -176,3 +177,4 @@ XKit.extensions.themes = new Object({
 	}
 
 });
+*/
