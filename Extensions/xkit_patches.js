@@ -193,9 +193,9 @@ XKit.extensions.xkit_patches = new Object({
 			 * For example, given `[[1, 2], ['a', 'b']]`, return
 			 * `[[1, 'a'], [1, 'b'], [2, 'a'], [2, 'b']]`.
 			 *
-			 * @param {Array<Array<Object>>} items - a list of collections to combine
+			 * @param {Array<Array<object>>} items - a list of collections to combine
 			 * @param {Array} current - The current recursive subtree, for tail recursion.
-			 * @returns {Array<Array<Object>>} - the list of combinations
+			 * @return {Array<Array<object>>} - the list of combinations
 			 */
 			XKit.tools.cartesian_product = (items, current = []) => {
 				if (current.length < items.length) {
@@ -247,11 +247,11 @@ XKit.extensions.xkit_patches = new Object({
 
 			/**
 			 * Show an XKit alert window
-			 * @param {String} title - Text for alert window's title bar
-			 * @param {String} msg - Text for body of window, can be HTML
+			 * @param {string} title - Text for alert window's title bar
+			 * @param {string} msg - Text for body of window, can be HTML
 			 * @param {"error"|"warning"|"question"|"info"} icon - Window's
 			 *   icon type, determined by CSS class `icon`.
-			 * @param {String} buttons - The HTML to be used in the button area of the window.
+			 * @param {string} buttons - The HTML to be used in the button area of the window.
 			 *                           Usually divs with class "xkit-button".
 			 * @param {boolean} wide - Whether the XKit window should be wide.
 			 */
@@ -298,11 +298,11 @@ XKit.extensions.xkit_patches = new Object({
 			 * more readable, by normalizing the additional indentation that
 			 * comes with their position in a source file.
 			 *
-			 * @param {String} level - the amount of indentation to add to
+			 * @param {string} level - the amount of indentation to add to
 			 *     every line, as a string. May be '' for no indentation.
-			 * @param {String} string - the input string to remove and/or add
+			 * @param {string} string - the input string to remove and/or add
 			 *     indentation from/to.
-			 * @returns {String} - the normalized string
+			 * @return {string} - the normalized string
 			 */
 			XKit.tools.normalize_indentation = (level, string) => {
 				const lines = string.split("\n");
@@ -317,7 +317,7 @@ XKit.extensions.xkit_patches = new Object({
 
 			/**
 			 * Gets redpop translation strings for selecting elements via aria labels
-			 * @param {String} key - en_US string to translate
+			 * @param {string} key - en_US string to translate
 			 * @return {Promise} - resolves with the translated key
 			 */
 			XKit.interface.translate = key => new Promise(resolve => {
@@ -362,7 +362,7 @@ XKit.extensions.xkit_patches = new Object({
 			 * into the page.
 			 * @param {Function} func
 			 * @param {boolean} exec - Whether to execute the function immediately
-			 * @param {Object} addt - The desired contents of the global variable
+			 * @param {object} addt - The desired contents of the global variable
 			 *                        `add_tag`. Only useful if `exec` is true
 			 */
 			XKit.tools.add_function = function(func, exec, addt) {
@@ -413,7 +413,7 @@ XKit.extensions.xkit_patches = new Object({
 			 *
 			 * @param {Function} func - This function is rendered to a string
 			 *     and then injected into the page.
-			 * @param {Object} args - arguments to pass to the function.
+			 * @param {object} args - arguments to pass to the function.
 			 *     Since the function is rendered to a string before being
 			 *     injected, it can't close over any variables, so everything
 			 *     used from the calling scope must be passed as an argument
@@ -467,7 +467,7 @@ XKit.extensions.xkit_patches = new Object({
 			 * @param {object} config - settings object
 			 * @param {string} config.mode - "add", "remove", or "delete"
 			 * @param {string[]} [config.tags] - array of tags to add or remove
-			 * @returns {Promise<object>}
+			 * @return {Promise<object>}
 			 */
 			XKit.interface.mass_edit = function(post_ids, config) {
 				const path = {
@@ -534,18 +534,18 @@ XKit.extensions.xkit_patches = new Object({
 				/**
 				 * Constructs HTML to add to the sidebar.
 				 * Primarily used by add, but can be used directly for custom positioning.
-				 * @param {Object} section
-				 * @param {String} section.id - The element ID for the whole sidebar section
-				 * @param {String} [section.title] - Visible header text of the sidebar section
-				 * @param {Object[]} [section.items] - Array of objects containing button data
-				 * @param {String} section.items[].id - Button element ID
-				 * @param {String} section.items[].text - Visible button text
-				 * @param {Number/String} [section.items[].count] - Text to be displayed as a counter on the button
-				 * @param {Boolean} [section.items[].carrot] - Whether to put a right-facing arrow on the button (shouldn't be combined with count)
-				 * @param {Object[]} [section.small] - Array of objects containing small link data (shouldn't contain more than two)
-				 * @param {String} section.small[].id - Button element ID
-				 * @param {String} section.small[].text - Visible button text
-				 * @return {String} Plug-ready sidebar controls section HTML
+				 * @param {object} section
+				 * @param {string} section.id - The element ID for the whole sidebar section
+				 * @param {string} [section.title] - Visible header text of the sidebar section
+				 * @param {object[]} [section.items] - Array of objects containing button data
+				 * @param {string} section.items[].id - Button element ID
+				 * @param {string} section.items[].text - Visible button text
+				 * @param {number|string} [section.items[].count] - Text to be displayed as a counter on the button
+				 * @param {boolean} [section.items[].carrot] - Whether to put a right-facing arrow on the button (shouldn't be combined with count)
+				 * @param {object[]} [section.small] - Array of objects containing small link data (shouldn't contain more than two)
+				 * @param {string} section.small[].id - Button element ID
+				 * @param {string} section.small[].text - Visible button text
+				 * @return {string} Plug-ready sidebar controls section HTML
 				 */
 				construct: function(section) {
 					section.items = section.items || [];
@@ -582,7 +582,7 @@ XKit.extensions.xkit_patches = new Object({
 
 				/**
 				 * Shortcut command for constructing and applying controls sections
-				 * @param {Object} section - see construct's documentation
+				 * @param {object} section - see construct's documentation
 				 */
 				add: function(section) {
 					if (!$("#xkit_sidebar").length) {
@@ -643,9 +643,9 @@ XKit.extensions.xkit_patches = new Object({
 			/**
 			 * Determines whether a user is following the given blog.
 			 * The logged-in user must be a member of the given blog to determine this.
-			 * @param {String} username
-			 * @param {String} blog
-			 * @return {Promise<Boolean>}
+			 * @param {string} username
+			 * @param {string} blog
+			 * @return {Promise<boolean>}
 			 */
 			XKit.interface.is_following = function(username, blog) {
 				return XKit.svc.blog.followed_by({
@@ -724,8 +724,8 @@ XKit.extensions.xkit_patches = new Object({
 				 * possible combinations of `key[0] key[1]` and then separating
 				 * them with commas.
 				 *
-				 * @param {...String} keys - the cssMap keys to combine.
-				 * @returns {String} - the combined CSS selector.
+				 * @param {...string} keys - the cssMap keys to combine.
+				 * @return {string} - the combined CSS selector.
 				 */
 				descendantSelector: function(...keys) {
 					return XKit.tools.cartesian_product(
@@ -827,10 +827,10 @@ XKit.extensions.xkit_patches = new Object({
 
 			/**
 			 * Get the posts on the screen without the given tag
-			 * @param {String} without_tag - Class that the posts should not have
-			 * @param {Boolean} mine - Whether the posts must be the user's
-			 * @param {Boolean} can_edit - Whether the posts must be editable
-			 * @return {Array<Object>} The posts
+			 * @param {string} without_tag - Class that the posts should not have
+			 * @param {boolean} mine - Whether the posts must be the user's
+			 * @param {boolean} can_edit - Whether the posts must be editable
+			 * @return {Array<object>} The posts
 			 */
 			XKit.interface.get_posts = function(without_tag, mine, can_edit) {
 				var posts = [];
@@ -873,7 +873,7 @@ XKit.extensions.xkit_patches = new Object({
 
 			/**
 			 * @param {JQuery} obj - Post element
-			 * @return {Promise<Object>} Resolves to an interface Post Object or rejects
+			 * @return {Promise<object>} Resolves to an interface Post Object or rejects
 			 */
 			XKit.interface.async_post = function(obj) {
 				if ($(obj).attr('data-id') && XKit.page.react) {
@@ -934,8 +934,8 @@ XKit.extensions.xkit_patches = new Object({
 				},
 				/**
 				 * Get the posts on the screen without the given tag
-				 * @param {String} without_tag - Class that the posts should not have
-				 * @param {Boolean} can_edit - Whether the posts must be editable
+				 * @param {string} without_tag - Class that the posts should not have
+				 * @param {boolean} can_edit - Whether the posts must be editable
 				 * @return {jQuery} JQuery object containing the posts
 				 */
 				get_posts: async function(without_tag, can_edit) {
@@ -953,8 +953,8 @@ XKit.extensions.xkit_patches = new Object({
 				},
 
 				/**
-				 * @param {String} post_id
-				 * @return {Object} Interface Post Object of post with given id
+				 * @param {string} post_id
+				 * @return {object} Interface Post Object of post with given id
 				 */
 				find_post: async function(post_id) {
 					// Return a post object based on post ID.
@@ -1004,11 +1004,11 @@ XKit.extensions.xkit_patches = new Object({
 				/**
 				 * Create a specification for a control button that can be added to
 				 * future posts using `XKit.interface.add_control_button`.
-				 * @param {String} class_name - CSS class of the button to be created
-				 * @param {String} icon - URL of the button's icon
-				 * @param {String} text - Hover text of the button
+				 * @param {string} class_name - CSS class of the button to be created
+				 * @param {string} icon - URL of the button's icon
+				 * @param {string} text - Hover text of the button
 				 * @param {EventListener} func - Function called on click of control button
-				 * @param {String?} ok_icon - URL of icon displayed when the button is
+				 * @param {string?} ok_icon - URL of icon displayed when the button is
 				 *                            "completed" (e.g. reblog button turning green)
 				 */
 				create_control_button: async function(class_name, icon, text, func, ok_icon) {
@@ -1080,8 +1080,8 @@ XKit.extensions.xkit_patches = new Object({
 				update_view: {
 					/**
 					 * Set the tags of a post
-					 * @param {Object} post_obj - Interface Post Object provided by XKit.interface.post
-					 * @param {String} tags - Comma-separated array of tags
+					 * @param {object} post_obj - Interface Post Object provided by XKit.interface.post
+					 * @param {string} tags - Comma-separated array of tags
 					 */
 					tags: async function(post_obj, tags) {
 						var post_div = $(`[data-id='${post_obj.id}']`);
@@ -1197,7 +1197,7 @@ XKit.extensions.xkit_patches = new Object({
 			/**
 			 * Get the secure_form_key through a request using the current form_key
 			 * @param {Function} callback - invoked with `{errors: Boolean, kitten: String}`
-			 * @param {Boolean} retry_mode - if true, don't retry on failure
+			 * @param {boolean} retry_mode - if true, don't retry on failure
 			 */
 			XKit.interface.kitty.get = async function(callback, retry_mode = false) {
 				if (XKit.interface.kitty.stored !== "") {
@@ -1235,7 +1235,7 @@ XKit.extensions.xkit_patches = new Object({
 			};
 
 			/**
-			 * @return {Object} Information about the browser's current location in Tumblr with keys
+			 * @return {object} Information about the browser's current location in Tumblr with keys
 			 *	inbox: boolean - Whether viewing inbox
 			 *	activity: boolean - Whether viewing activity
 			 *	queue: boolean - Whether viewing queue
@@ -1289,7 +1289,7 @@ XKit.extensions.xkit_patches = new Object({
 
 			/**
 			 * Get the user's currently selected blog.
-			 * @return {String} blog id, e.g. new-xkit-extension.
+			 * @return {string} blog id, e.g. new-xkit-extension.
 			 */
 			XKit.tools.get_current_blog = function() {
 				var avatar = $("#post_controls_avatar");
@@ -1305,8 +1305,8 @@ XKit.extensions.xkit_patches = new Object({
 
 			/**
 			 * Parse an XKit extension version string of form X.Y.Z or X.Y REV Z
-			 * @param {String} versionString
-			 * @return {Object} version descriptor with keys major, minor, and patch
+			 * @param {string} versionString
+			 * @return {object} version descriptor with keys major, minor, and patch
 			 */
 			XKit.tools.parse_version = function(versionString) {
 				if (typeof(versionString) === "undefined" || versionString === "") {
@@ -1333,7 +1333,7 @@ XKit.extensions.xkit_patches = new Object({
 			};
 
 			/**
-			 * @return {Array<String>} user's blogs' IDs
+			 * @return {Array<string>|undefined} user's blogs' IDs
 			 */
 			XKit.tools.get_blogs = function() {
 				var m_blogs = [];
@@ -1400,10 +1400,10 @@ XKit.extensions.xkit_patches = new Object({
 
 			/**
 			 * Creates a link to a github issue with error text and template
-			 * @param {String} title - the title of the github issue--should be unique and useful
-			 * @param {Object?} data - Key-value pairs to list at the top of the issue.
+			 * @param {string} title - the title of the github issue--should be unique and useful
+			 * @param {object?} data - Key-value pairs to list at the top of the issue.
 			 * @param {Error?} error - An exception to serialize, if availible
-			 * @return {String} The url to link the user to
+			 * @return {string} The url to link the user to
 			 */
 			XKit.tools.github_issue = function(title, data, error) {
 
@@ -1443,7 +1443,7 @@ XKit.extensions.xkit_patches = new Object({
 			 * Multiple calls before the function is executed resets the timer.
 			 * @param {Function} func - Function to wrap. Will be executed with
 										the *last* passed 'this' values and arguments
-			 * @param {Number} wait - Milliseconds to pass to setTimeout. Delay that occurs after the last function call
+			 * @param {number} wait - Milliseconds to pass to setTimeout. Delay that occurs after the last function call
 			 * @return {Function} The wrapped, debounced function.
 			 */
 			XKit.tools.debounce = function(func, wait) {
@@ -1467,7 +1467,7 @@ XKit.extensions.xkit_patches = new Object({
 			XKit.tools.add_function_nonce = "";
 
 			/**
-			 * @return {Object} The elements of XKit's storage as a map from setting key to
+			 * @return {object} The elements of XKit's storage as a map from setting key to
 			 *                  setting value
 			 */
 			XKit.tools.dump_config = function() {
@@ -1485,8 +1485,8 @@ XKit.extensions.xkit_patches = new Object({
 			};
 
 			/**
-			 * @param {String} text - the text to be escaped
-			 * @return {String} Will return the passed text, with all potentially
+			 * @param {string} text - the text to be escaped
+			 * @return {string} Will return the passed text, with all potentially
 			 *                  dangerous-for-HTML characters escaped
 			 *
 			 * see also https://www.owasp.org/index.php/XSS_%28Cross_Site_Scripting%29_Prevention_Cheat_Sheet#XSS_Prevention_Rules
@@ -1507,8 +1507,8 @@ XKit.extensions.xkit_patches = new Object({
 			};
 
 			/**
-			 * @param {String} name - Name of URL parameter to retrieve
-			 * @return {String} Value of parameter or ""
+			 * @param {string} name - Name of URL parameter to retrieve
+			 * @return {string} Value of parameter or ""
 			 */
 			XKit.tools.getParameterByName = function(name) {
 				// http://stackoverflow.com/a/901144/2073440
@@ -1524,7 +1524,7 @@ XKit.extensions.xkit_patches = new Object({
 			};
 
 			/**
-			 * @return {Object} An overview of the browser's information:
+			 * @return {object} An overview of the browser's information:
 			 *	name: "Google Chrome" | "Mozilla Firefox" | "Apple Safari" - The browser's human-readable name
 			 *	spoofed: boolean - Whether XKit suspects the user of spoofing an IE user agent.
 			 *	chrome: boolean - Whether the browser is Chrome
@@ -1603,7 +1603,7 @@ XKit.extensions.xkit_patches = new Object({
 			XKit.iframe = {
 
 				/**
-				 * @return {String} Id of blog which the iframe refers to (usually
+				 * @return {string} Id of blog which the iframe refers to (usually
 				 *                  the blog in which the iframe is embedded)
 				 */
 				get_tumblelog: function() {
@@ -1614,7 +1614,7 @@ XKit.extensions.xkit_patches = new Object({
 				},
 
 				/**
-				 * @return {String} Post to which this iframe refers
+				 * @return {string} Post to which this iframe refers
 				 */
 				single_post_id: function() {
 					var all_post_ids = document.location.href.match(/[&?](singlePostId|pid|postId)=(\d+)/);
@@ -1622,7 +1622,7 @@ XKit.extensions.xkit_patches = new Object({
 				},
 
 				/**
-				 * @return {String} Form key of the iframe (the data to use in a
+				 * @return {string} Form key of the iframe (the data to use in a
 				 *                  reblog or other API request)
 				 */
 				form_key: function() {
@@ -1646,7 +1646,7 @@ XKit.extensions.xkit_patches = new Object({
 				},
 
 				/**
-				 * @param  {String} name: the css class name of the button
+				 * @param  {string} name - the css class name of the button
 				 * @return {JQuery} the element for that css class name
 				 */
 				tx_button_selector: function(name) {
@@ -1760,7 +1760,7 @@ XKit.extensions.xkit_patches = new Object({
 					expire_time: 600000,
 
 					/**
-					 * @param {String} kitty - The new secure_form_key value.
+					 * @param {string} kitty - The new secure_form_key value.
 					 */
 					set: function(kitty) {
 
@@ -1780,9 +1780,9 @@ XKit.extensions.xkit_patches = new Object({
 					/**
 					 * Create a specification for a control button that can be added to
 					 * future posts using `XKit.post_window.add_control_button`.
-					 * @param {String} class_name - CSS class of the button to be created
-					 * @param {String} icon - URL of the button's icon
-					 * @param {String} text - Hover text of the button
+					 * @param {string} class_name - CSS class of the button to be created
+					 * @param {string} icon - URL of the button's icon
+					 * @param {string} text - Hover text of the button
 					 * @param {EventListener} func - Function called on click of control button
 					 */
 					create_control_button: function(class_name, icon, text, func) {
@@ -1806,8 +1806,8 @@ XKit.extensions.xkit_patches = new Object({
 					/**
 					 * Instantiate and add a previously "created" button to the
 					 * current post window.
-					 * @param {String} class_name - CSS class of the button to be added
-					 * @param {String?} additional - String inserted into the button's div tag
+					 * @param {string} class_name - CSS class of the button to be added
+					 * @param {string?} additional - String inserted into the button's div tag
 					 */
 					add_control_button: function(class_name, additional) {
 
@@ -1834,7 +1834,7 @@ XKit.extensions.xkit_patches = new Object({
 					},
 
 					/**
-					 * @return {String} HTML content of the current post window
+					 * @return {string} HTML content of the current post window
 					 */
 					get_content_html: function() {
 						if ($(".html-field").css("display") === "none") {
@@ -1862,7 +1862,7 @@ XKit.extensions.xkit_patches = new Object({
 
 					/**
 					 * Sets the content of the post window.
-					 * @param {String} new_content
+					 * @param {string} new_content
 					 */
 					set_content_html: function(new_content) {
 						if ($(".html-field").css("display") === "none") {
@@ -1901,7 +1901,7 @@ XKit.extensions.xkit_patches = new Object({
 
 					/**
 					 * Adds tags to the post window.
-					 * @param {String|Array<String>} tag_or_tags
+					 * @param {string|Array<string>} tag_or_tags
 					 */
 					add_tag: function(tag_or_tags) {
 						var tag_editor = $(".post-form--tag-editor").find(".editor-plaintext");
@@ -1921,7 +1921,7 @@ XKit.extensions.xkit_patches = new Object({
 					},
 
 					/**
-					 * @param {String} tag
+					 * @param {string} tag
 					 * @return {boolean} Whether the tag exists in the current post window's tag input
 					 */
 					tag_exists: function(tag) {
@@ -1953,7 +1953,7 @@ XKit.extensions.xkit_patches = new Object({
 
 					/**
 					 * Remove a specific tag from the current post window
-					 * @param {String} tag
+					 * @param {string} tag
 					 */
 					remove_tag: function(tag) {
 
@@ -1975,7 +1975,7 @@ XKit.extensions.xkit_patches = new Object({
 					},
 
 					/**
-					 * @return {Object} State of the post, with keys
+					 * @return {object} State of the post, with keys
 					 *	publish: boolean - Whether the post will be published (default new post)
 					 *	draft: boolean - Whether the post will be drafted
 					 *	queue: boolean - Whether the post will be queued
@@ -1995,7 +1995,7 @@ XKit.extensions.xkit_patches = new Object({
 					},
 
 					/**
-					 * @return {Object} Description of post type, see keys in function source
+					 * @return {object} Description of post type, see keys in function source
 					 */
 					post_type: function() {
 						var post_form = $(".post-form");
@@ -2012,7 +2012,7 @@ XKit.extensions.xkit_patches = new Object({
 					},
 
 					/**
-					 * @return {String} Blog making the post
+					 * @return {string} Blog making the post
 					 */
 					blog: function() {
 
@@ -2021,7 +2021,7 @@ XKit.extensions.xkit_patches = new Object({
 					},
 
 					/**
-					 * @param {String} url - URL of blog to which to switch the post window
+					 * @param {string} url - URL of blog to which to switch the post window
 					 * @return {boolean} Whether the switch succeeded
 					 */
 					switch_blog: function(url) {
@@ -2049,7 +2049,7 @@ XKit.extensions.xkit_patches = new Object({
 					},
 
 					/**
-					 * @return {String} Type of post, see also XKit.interface.post_window.post_type
+					 * @return {string} Type of post, see also XKit.interface.post_window.post_type
 					 */
 					type: function() {
 						var types = ['text', 'photo', 'quote', 'link', 'chat', 'audio', 'video'];
@@ -2065,7 +2065,7 @@ XKit.extensions.xkit_patches = new Object({
 					},
 
 					/**
-					 * @return {Object} Description of originality of post with boolean
+					 * @return {object} Description of originality of post with boolean
 					 *                  keys is_reblog and is_original for the two cases.
 					 */
 					origin: function() {
@@ -2164,7 +2164,7 @@ XKit.extensions.xkit_patches = new Object({
 
 					/**
 					 * Call func whenever a new create post window appears
-					 * @param {String} id - globally unique identifier of function for removal
+					 * @param {string} id - globally unique identifier of function for removal
 					 * @param {Function} func - function to call
 					 */
 					add: function(id, func) {
@@ -2181,7 +2181,7 @@ XKit.extensions.xkit_patches = new Object({
 					},
 
 					/**
-					 * @param {String} id - ID of function to remove as provided in
+					 * @param {string} id - ID of function to remove as provided in
 					 *                      XKit.interface.post_window_listener.add
 					 */
 					remove: function(id) {
@@ -2206,8 +2206,8 @@ XKit.extensions.xkit_patches = new Object({
 
 					/**
 					 * Set the tags of a post
-					 * @param {Object} post_obj - Interface Post Object provided by XKit.interface.post
-					 * @param {String} tags - Comma-separated array of tags
+					 * @param {object} post_obj - Interface Post Object provided by XKit.interface.post
+					 * @param {string} tags - Comma-separated array of tags
 					 */
 					tags: function(post_obj, tags) {
 
@@ -2257,10 +2257,10 @@ XKit.extensions.xkit_patches = new Object({
 
 				/**
 				 * Override parameters of a post object
-				 * @param {Object} tumblr_object
-				 * @param {Object} settings - Object with keys `tags` and/or `caption` which
+				 * @param {object} tumblr_object
+				 * @param {object} settings - Object with keys `tags` and/or `caption` which
 				 *                            will override tumblr_object's corresponding keys.
-				 * @return {Object} Updated tumblr_object (same as the param) or an
+				 * @return {object} Updated tumblr_object (same as the param) or an
 				 *                  error object with keys `error` and `message`
 				 */
 				edit_post_object: function(tumblr_object, settings) {
@@ -2310,7 +2310,7 @@ XKit.extensions.xkit_patches = new Object({
 
 				/**
 				 * Edit a post
-				 * @param {Object} tumblr_object - Tumblr information corresponding to post
+				 * @param {object} tumblr_object - Tumblr information corresponding to post
 				 * @param {Function} func - Callback upon edit completion or error. If error,
 				 *                          argument has keys error:true and message:String. Otherwise
 				 *                          it contains JSON data of Tumblr's response to the edit.
@@ -2519,7 +2519,7 @@ XKit.extensions.xkit_patches = new Object({
 				},
 
 				/**
-				 * @param {Object} post_object - Interface Post Object provided by XKit.interface.post
+				 * @param {object} post_object - Interface Post Object provided by XKit.interface.post
 				 * @param {Function} func - Called on error or on completion with an object describing
 				 *                          the results of the fetch. The object has key error: true
 				 *                          if there is an error.
@@ -2645,11 +2645,11 @@ XKit.extensions.xkit_patches = new Object({
 				/**
 				 * Create a specification for a control button that can be added to
 				 * future posts using `XKit.interface.add_control_button`.
-				 * @param {String} class_name - CSS class of the button to be created
-				 * @param {String} icon - URL of the button's icon
-				 * @param {String} text - Hover text of the button
+				 * @param {string} class_name - CSS class of the button to be created
+				 * @param {string} icon - URL of the button's icon
+				 * @param {string} text - Hover text of the button
 				 * @param {EventListener} func - Function called on click of control button
-				 * @param {String?} ok_icon - URL of icon displayed when the button is
+				 * @param {string?} ok_icon - URL of icon displayed when the button is
 				 *                            "completed" (e.g. reblog button turning green)
 				 */
 				create_control_button: function(class_name, icon, text, func, ok_icon) {
@@ -2682,9 +2682,9 @@ XKit.extensions.xkit_patches = new Object({
 				/**
 				 * Instantiate and add a previously "created" button to the
 				 * specified post.
-				 * @param {Object} obj - Interface Post Object
-				 * @param {String} class_name - CSS class of the button to be added
-				 * @param {String?} additional - String inserted into the button's div tag
+				 * @param {object} obj - Interface Post Object
+				 * @param {string} class_name - CSS class of the button to be added
+				 * @param {string?} additional - String inserted into the button's div tag
 				 */
 				add_control_button: function(obj, class_name, additional) {
 
@@ -2720,8 +2720,8 @@ XKit.extensions.xkit_patches = new Object({
 				},
 
 				/**
-				 * @param {String} post_id
-				 * @return {Object} Interface Post Object of post with given id
+				 * @param {string} post_id
+				 * @return {object} Interface Post Object of post with given id
 				 */
 				find_post: function(post_id) {
 
@@ -2742,7 +2742,7 @@ XKit.extensions.xkit_patches = new Object({
 
 				/**
 				 * @param {JQuery} obj - Post element
-				 * @return {Object} Interface Post Object or {error: true}
+				 * @return {object|undefined} Interface Post Object or {error: true}
 				 */
 				post: function(obj) {
 
@@ -2897,7 +2897,7 @@ XKit.extensions.xkit_patches = new Object({
 				},
 
 				/**
-				 * @return {String} The current Tumblr form_key used for authentication
+				 * @return {string} The current Tumblr form_key used for authentication
 				 */
 				form_key: function() {
 
@@ -2915,7 +2915,7 @@ XKit.extensions.xkit_patches = new Object({
 				},
 
 				/**
-				 * @return {String} The concatentation of two form keys. Unused and likely a typo.
+				 * @return {string} The concatentation of two form keys. Unused and likely a typo.
 				 */
 				check_key: function() {
 
@@ -2924,7 +2924,7 @@ XKit.extensions.xkit_patches = new Object({
 				},
 
 				/**
-				 * @return {Object} Various information about the current user with keys
+				 * @return {object} Various information about the current user with keys
 				 *	posts: number - Number of posts
 				 *	followers: number - Number of followers
 				 *	drafts: number - Number of drafts
@@ -2999,7 +2999,7 @@ XKit.extensions.xkit_patches = new Object({
 				/**
 				 * Whether the page is an "official" tumblr page like the dashboard or
 				 * if it is a user-styled page like a blog.
-				 * @return {Boolean}
+				 * @return {boolean}
 				 */
 				is_tumblr_page: function() {
 					// Effectively if the href is of the form https://www.tumblr.com
@@ -3076,8 +3076,8 @@ XKit.extensions.xkit_patches = new Object({
 
 			/**
 			 * Add an XKit notification popup (will appear in bottom left corner)
-			 * @param {String} message - Text of notification
-			 * @param {String} type - Desired CSS class of notification, see function
+			 * @param {string} message - Text of notification
+			 * @param {string} type - Desired CSS class of notification, see function
 			 *                        for possibilities.
 			 * @param {boolean} sticky - If true, the notification will not fade out over time.
 			 * @param {Function} callback - On click callback for notification
@@ -3133,8 +3133,8 @@ XKit.extensions.xkit_patches = new Object({
 			};
 
 			/**
-			 * @param {String} extension
-			 * @return {Boolean} Whether the extension is running
+			 * @param {string} extension
+			 * @return {boolean} Whether the extension is running
 			 */
 			XKit.installed.is_running = function(extension) {
 				return XKit.installed.check(extension) &&
@@ -3145,7 +3145,7 @@ XKit.extensions.xkit_patches = new Object({
 			/**
 			 * Schedule a callback to be run only if `extension` is installed and running.
 			 * Call an alternate if the extension is not running.
-			 * @param {String} extension
+			 * @param {string} extension
 			 * @param {Function} onRunning
 			 * @param {Function?} onFailure
 			 */
@@ -3182,11 +3182,11 @@ XKit.extensions.xkit_patches = new Object({
 
 				/**
 				 * Simulates a tumblr notification ("toast")
-				 * @param {Boolean} created - true if post was not queued/drafted
-				 * @param {String} action - post action description (i.e. "Reblogged to ")
-				 * @param {String} url - tumblr blog name (for both notification and API)
-				 * @param {Integer/String} id - created post id for peepr (optional)
-				 * @param {String} crumb - arbitrary class for "crumb" (optional)
+				 * @param {boolean} created - true if post was not queued/drafted
+				 * @param {string} action - post action description (i.e. "Reblogged to ")
+				 * @param {string} url - tumblr blog name (for both notification and API)
+				 * @param {number|string} id - created post id for peepr (optional)
+				 * @param {string} crumb - arbitrary class for "crumb" (optional)
 				 */
 				add: function(created, action, url, id, crumb) {
 					var toastno = XKit.toast.count;
