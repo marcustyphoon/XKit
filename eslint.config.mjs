@@ -3,7 +3,6 @@ import { globalIgnores } from "eslint/config";
 import globals from "globals";
 
 export default [
-	js.configs.recommended,
 	globalIgnores(["**/vendor/", "**/*.icon.js"]),
 	{
 		languageOptions: {
@@ -38,7 +37,10 @@ export default [
 			ecmaVersion: 2018,
 			sourceType: "script",
 		},
+	},
 
+	js.configs.recommended,
+	{
 		rules: {
 			"dot-notation": [
 				"error",
