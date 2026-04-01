@@ -193,9 +193,9 @@ XKit.extensions.xkit_patches = new Object({
 			 * For example, given `[[1, 2], ['a', 'b']]`, return
 			 * `[[1, 'a'], [1, 'b'], [2, 'a'], [2, 'b']]`.
 			 *
-			 * @param {object[][]} items - a list of collections to combine
+			 * @param {Array<Array<object>>} items - a list of collections to combine
 			 * @param {Array} current - The current recursive subtree, for tail recursion.
-			 * @returns {object[][]} - the list of combinations
+			 * @returns {Array<Array<object>>} - the list of combinations
 			 */
 			XKit.tools.cartesian_product = (items, current = []) => {
 				if (current.length < items.length) {
@@ -540,7 +540,7 @@ XKit.extensions.xkit_patches = new Object({
 				 * @param {object[]} [section.items] - Array of objects containing button data
 				 * @param {string} section.items[].id - Button element ID
 				 * @param {string} section.items[].text - Visible button text
-				 * @param {number|string} [section.items[].count] - Text to be displayed as a counter on the button
+				 * @param {number/string} [section.items[].count] - Text to be displayed as a counter on the button
 				 * @param {boolean} [section.items[].carrot] - Whether to put a right-facing arrow on the button (shouldn't be combined with count)
 				 * @param {object[]} [section.small] - Array of objects containing small link data (shouldn't contain more than two)
 				 * @param {string} section.small[].id - Button element ID
