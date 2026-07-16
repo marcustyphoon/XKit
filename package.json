@@ -16,6 +16,9 @@
     "nodemon": "^3.1.14",
     "web-ext": "^10.5.0"
   },
+  "allowScripts": {
+    "fsevents": true
+  },
   "webExt": {
     "ignoreFiles": [
       ".*",
